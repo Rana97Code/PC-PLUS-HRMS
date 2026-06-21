@@ -13,6 +13,7 @@ const AddTransaction: React.FC = () => {
 
     const headers = user.headers;
     const baseUrl = user.base_url;
+  
 
     const getTodayDate = () => {
         const today = new Date();
@@ -30,12 +31,13 @@ const AddTransaction: React.FC = () => {
         due_amount: 0,
         return_amount: 0,
         transaction_notes: '',
-        created_by: 1,
+        created_by: user?.email || "office@email.com",
     };
 
     const [form, setForm] = useState(emptyForm);
     const [transactionList, setTransactionList] = useState<any[]>([]);
 
+    
     const handleChange = (field: string, value: any) => {
         setForm({
             ...form,
@@ -65,7 +67,6 @@ const AddTransaction: React.FC = () => {
             alert('Please add at least one transaction');
             return;
         }
-
         try {
             await axios.post(`${baseUrl}/transaction/add-multiple-transaction`, transactionList, { headers });
             navigate('/pages/accounts/transaction');
@@ -116,7 +117,8 @@ const AddTransaction: React.FC = () => {
                                 
                                 >
                                     <option value="">Select Transaction Type</option>
-                                    <option value="Office">Office</option>
+                                    <option value="Service_Sales">Service & Sales</option>
+                                    <option value="Office_Investment">Office Investment</option>
                                     <option value="Utilities">Utilities</option>
                                     <option value="Bazzar">Bazzar</option>
                                     <option value="Transport">Transport</option>
@@ -136,7 +138,7 @@ const AddTransaction: React.FC = () => {
                                 <input
                                     type="text"
                                     className="form-input"
-                                    placeholder="Ifat"
+                                    placeholder="Name Of Provider"
                                     value={form.transaction_by}
                                     onChange={(e) => handleChange('transaction_by', e.target.value)}
                                 />
@@ -147,14 +149,14 @@ const AddTransaction: React.FC = () => {
                                 <input
                                     type="text"
                                     className="form-input"
-                                    placeholder="Momin"
+                                    placeholder="Name Of Receiver"
                                     value={form.transaction_to}
                                     onChange={(e) => handleChange('transaction_to', e.target.value)}
                                 />
                             </div>
 
                             <div>
-                                <label>Amount In</label>
+                                <label>Amount Credit</label>
                                 <input
                                     type="number"
                                     step="0.01"
@@ -165,7 +167,7 @@ const AddTransaction: React.FC = () => {
                             </div>
 
                             <div>
-                                <label>Amount Out</label>
+                                <label>Amount Debit</label>
                                 <input
                                     type="number"
                                     step="0.01"

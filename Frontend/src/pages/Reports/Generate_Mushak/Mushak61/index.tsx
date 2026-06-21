@@ -41,7 +41,7 @@ const index = () => {
 
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get('http://localhost:8080/bmitvat/api/mushak61/rawmaterial', { headers })
+            axios.get('http://localhost:8080/pcplusvat/api/mushak61/rawmaterial', { headers })
                 .then((response) => {
                     setSuggestItem(response.data);
                 })

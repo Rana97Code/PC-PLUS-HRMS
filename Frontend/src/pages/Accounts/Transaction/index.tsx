@@ -115,7 +115,7 @@ const TransactionIndex = () => {
                                     title: 'Invoice No',
                                     sortable: true,
                                     render: ({ id, transaction_invoice }) => (
-                                        <NavLink to={`/pages/transaction/details/${id}`} className="text-cyan-500">
+                                        <NavLink to={`/pages/accounts/transaction/invoice/${id}`} className="text-cyan-500">
                                             {transaction_invoice}
                                         </NavLink>
                                     ),

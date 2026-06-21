@@ -7,11 +7,12 @@ from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from pathlib import *
 import os
-from sqlalchemy import desc
-from datetime import datetime
+from sqlalchemy import desc, extract, func
+from datetime import datetime, date, timedelta
 from sqlalchemy.sql.sqltypes import Numeric
 from app.models.accounts.Transaction_model import Transaction
 from app.models.accounts.Balance_model import Balance
+from app.models.user_model import User
 from app.schemas.accounts.Transaction_schema import TransactionInsertSchema, TransactionUpdateSchema, TransactionFetchSchema, TransactionResponseSchema
 from app.schemas.accounts.Balance_schema import BalanceCreate, BalanceUpdate, BalanceResponse
 from app.models.inventory.InventoryStock_model import Stock, StockHistory
@@ -21,6 +22,7 @@ from app.schemas.production.procurement.ForeignPurchase_schema import ForeignPur
 from app.schemas.production.procurement.ServicePurchase_schema import ServicePurchaseInsertSchema, ServicePurchaseFetch
 from app.models.general_settings.hs_code_model import Hscode
 from app.models.inventory.item_model import Item, ItemSuggest
+from sqlalchemy import func
 
 Transaction_router = APIRouter()
 
@@ -78,87 +80,6 @@ async def get_transaction_details_by_id(t_id: int, db: Session = Depends(get_db)
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-# @Transaction_router.post("/pcplus/api/transaction/add-transaction",dependencies=[Depends(get_current_active_user)])
-# async def create_transaction(
-#     TransactionSchema: TransactionInsertSchema,
-#     db: Session = Depends(get_db)
-# ):
-
-#     try:
-#         # 1. Generate Invoice No
-
-#         last_transaction = db.query(Transaction).order_by(desc(Transaction.id)).first()
-#         next_id = 1 if last_transaction is None else last_transaction.id + 1
-
-#         TransactionInv = (
-#             "TRN-" +
-#             datetime.now().strftime('%Y%m%d') +
-#             '-' +
-#             f"{next_id:04d}"
-#         )
-
-#         # 2. Transaction
-#         transaction=Transaction(
-#             transaction_date=TransactionSchema.transaction_date,
-#             transaction_type=TransactionSchema.transaction_type,
-#             transaction_by=TransactionSchema.transaction_by,
-#             transaction_to=TransactionSchema.transaction_to,
-#             transaction_invoice=TransactionInv,
-#             amount_in=TransactionSchema.amount_in,
-#             amount_out=TransactionSchema.amount_out,
-#             cost=TransactionSchema.cost,
-#             due_amount=TransactionSchema.due_amount,
-#             return_amount=TransactionSchema.return_amount,
-#             transaction_notes=TransactionSchema.transaction_notes,
-#             created_by=TransactionSchema.created_by
-#         )
-#         db.add(transaction)
-#         db.flush() 
-
-#         # 3. Balance Update
-#         last_cost = db.query(Balance).order_by(desc(Balance.id)).first()
-
-#         pre_cost = last_cost.current_cost if last_cost and last_cost.current_cost is not None else 0
-#         pre_due = last_cost.current_due if last_cost and last_cost.current_due is not None else 0
-#         pre_balance = last_cost.current_balance if last_cost and last_cost.current_balance is not None else 0
-
-#         cost = TransactionSchema.cost or 0
-#         due_amount = TransactionSchema.due_amount or 0
-
-#         db.add(Balance(
-#             previous_cost=pre_cost,
-#             current_cost=pre_cost + cost,
-#             previous_due=pre_due,
-#             current_due=pre_due + due_amount,
-#             previous_balance=pre_balance,
-#             current_balance=pre_balance - cost,
-#             status=1,
-#             created_by=TransactionSchema.created_by
-#         ))
-
-#         # 4. Commit Transaction
-
-#         db.commit()
-
-#         return {
-#             "success": True,
-#             "message": "Transaction created successfully",
-#             "transaction_id": transaction.id,
-#             "invoice_no": TransactionInv
-#         }
-
-#     except Exception as e:
-#         # ROLLBACK EVERYTHING
-#         db.rollback()
-
-#         raise HTTPException(
-#             status_code=400,
-#             detail=f"Transaction failed: {str(e)}"
-#         )
-
-#     finally:
-#         db.close()
-
 from typing import List
 
 @Transaction_router.post("/pcplus/api/transaction/add-multiple-transaction", dependencies=[Depends(get_current_active_user)])
@@ -167,6 +88,9 @@ async def create_multiple_transaction(
     db: Session = Depends(get_db)
 ):
     try:
+        if not transactions:
+            raise HTTPException(status_code=400, detail="No transaction found")
+
         last_transaction = db.query(Transaction).order_by(desc(Transaction.id)).first()
         next_id = 1 if last_transaction is None else last_transaction.id + 1
 
@@ -177,21 +101,37 @@ async def create_multiple_transaction(
             f"{next_id:04d}"
         )
 
+        creator = db.query(User).filter(
+            User.user_email == transactions[0].created_by
+        ).first()
+
+        if not creator:
+            raise HTTPException(status_code=404, detail="Creator user not found")
+
         last_balance = db.query(Balance).order_by(desc(Balance.id)).first()
 
         pre_cost = last_balance.current_cost if last_balance and last_balance.current_cost is not None else 0
         pre_due = last_balance.current_due if last_balance and last_balance.current_due is not None else 0
         pre_balance = last_balance.current_balance if last_balance and last_balance.current_balance is not None else 0
 
+        total_amount_in = 0
+        total_amount_out = 0
         total_cost = 0
         total_due = 0
+        total_return = 0
 
         for item in transactions:
+            amount_in = item.amount_in or 0
+            amount_out = item.amount_out or 0
             cost = item.cost or 0
             due_amount = item.due_amount or 0
+            return_amount = item.return_amount or 0
 
+            total_amount_in += amount_in
+            total_amount_out += amount_out
             total_cost += cost
             total_due += due_amount
+            total_return += return_amount
 
             transaction = Transaction(
                 transaction_date=item.transaction_date,
@@ -199,16 +139,23 @@ async def create_multiple_transaction(
                 transaction_by=item.transaction_by,
                 transaction_to=item.transaction_to,
                 transaction_invoice=TransactionInv,
-                amount_in=item.amount_in,
-                amount_out=item.amount_out,
-                cost=item.cost,
-                due_amount=item.due_amount,
-                return_amount=item.return_amount,
+                amount_in=amount_in,
+                amount_out=amount_out,
+                cost=cost,
+                due_amount=due_amount,
+                return_amount=return_amount,
                 transaction_notes=item.transaction_notes,
-                created_by=item.created_by
+                created_by=creator.id
             )
 
             db.add(transaction)
+
+        new_balance = (
+            pre_balance
+            + total_amount_in
+            + total_return
+            - total_amount_out
+        )
 
         db.add(Balance(
             previous_cost=pre_cost,
@@ -216,9 +163,9 @@ async def create_multiple_transaction(
             previous_due=pre_due,
             current_due=pre_due + total_due,
             previous_balance=pre_balance,
-            current_balance=pre_balance - total_cost,
+            current_balance=new_balance,
             status=1,
-            created_by=transactions[0].created_by if transactions else None
+            created_by=creator.id
         ))
 
         db.commit()
@@ -226,7 +173,14 @@ async def create_multiple_transaction(
         return {
             "success": True,
             "message": "Transactions created successfully",
-            "invoice_no": TransactionInv
+            "invoice_no": TransactionInv,
+            "previous_balance": pre_balance,
+            "current_balance": new_balance,
+            "total_amount_in": total_amount_in,
+            "total_amount_out": total_amount_out,
+            "total_cost": total_cost,
+            "total_due": total_due,
+            "total_return": total_return
         }
 
     except Exception as e:
@@ -254,3 +208,271 @@ async def index(db:Session=Depends(get_db)):
 
     junit = jsonable_encoder(p_item)
     return JSONResponse(content=junit)
+
+
+@Transaction_router.get("/pcplus/api/transaction/transaction_invoice/{id}", dependencies=[Depends(get_current_active_user)])
+async def transaction_invoice(id: int, db: Session = Depends(get_db)):
+    first_transaction = db.query(Transaction).filter(Transaction.id == id).first()
+
+    if not first_transaction:
+        raise HTTPException(status_code=404, detail="Transaction not found")
+
+    invoice_no = first_transaction.transaction_invoice
+
+    creator = (db.query(User).filter(User.id == first_transaction.created_by)
+                .first()
+              )
+
+    transactions = db.query(Transaction).filter(
+        Transaction.transaction_invoice == invoice_no
+    ).all()
+
+    items = []
+    total_amount_in = 0
+    total_amount_out = 0
+    total_cost = 0
+    total_due = 0
+    total_return = 0
+
+    for t in transactions:
+        total_amount_in += t.amount_in or 0
+        total_amount_out += t.amount_out or 0
+        total_cost += t.cost or 0
+        total_due += t.due_amount or 0
+        total_return += t.return_amount or 0
+
+        items.append({
+            "id": t.id,
+            "transaction_date": t.transaction_date,
+            "transaction_type": t.transaction_type,
+            "transaction_by": t.transaction_by,
+            "transaction_to": t.transaction_to,
+            "amount_in": t.amount_in,
+            "amount_out": t.amount_out,
+            "cost": t.cost,
+            "due_amount": t.due_amount,
+            "return_amount": t.return_amount,
+            "transaction_notes": t.transaction_notes,
+        })
+
+    return jsonable_encoder({
+        "invoice_no": invoice_no,
+        "invoice_date": first_transaction.transaction_date,
+        "created_by": creator.user_name,
+        "total_amount_in": total_amount_in,
+        "total_amount_out": total_amount_out,
+        "total_cost": total_cost,
+        "total_due": total_due,
+        "total_return": total_return,
+        "items": items,
+    })
+
+
+
+
+
+@Transaction_router.get("/pcplus/api/accounts/investor-contribution", dependencies=[Depends(get_current_active_user)])
+async def investor_contribution(db: Session = Depends(get_db)):
+    rows = (
+        db.query(
+            Transaction.transaction_by.label("investor_name"),
+            func.sum(Transaction.amount_in).label("total_amount_in"),
+            func.count(Transaction.id).label("total_transaction")
+        )
+        .filter(Transaction.amount_in > 0)
+        .filter(Transaction.transaction_type == "Office_Investment")
+        .filter(Transaction.transaction_type != "Service_Sales")
+        .group_by(Transaction.transaction_by)
+        .all()
+    )
+
+    data = []
+    for r in rows:
+        data.append({
+            "investor_name": r.investor_name,
+            "total_amount_in": r.total_amount_in or 0,
+            "total_transaction": r.total_transaction
+        })
+
+    return jsonable_encoder(data)
+
+
+
+
+@Transaction_router.get("/pcplus/api/accounts/investor-contribution/{investor_name}", dependencies=[Depends(get_current_active_user)])
+async def investor_contribution_details(investor_name: str, db: Session = Depends(get_db)):
+    rows = (
+        db.query(Transaction)
+        .filter(Transaction.transaction_by == investor_name)
+        .filter(Transaction.amount_in > 0)
+        .order_by(desc(Transaction.id))
+        .all()
+    )
+
+    data = []
+    for t in rows:
+        data.append({
+            "id": t.id,
+            "transaction_date": t.transaction_date,
+            "transaction_type": t.transaction_type,
+            "transaction_by": t.transaction_by,
+            "transaction_to": t.transaction_to,
+            "transaction_invoice": t.transaction_invoice,
+            "amount_in": t.amount_in,
+            "amount_out": t.amount_out,
+            "cost": t.cost,
+            "due_amount": t.due_amount,
+            "return_amount": t.return_amount,
+            "transaction_notes": t.transaction_notes,
+            "created_at": t.created_at,
+            "created_by": t.created_by,
+            "updated_at": t.updated_at,
+            "updated_by": t.updated_by,
+        })
+
+    return jsonable_encoder(data)
+
+
+@Transaction_router.get("/pcplus/api/accounts/latest-balance", dependencies=[Depends(get_current_active_user)])
+async def latest_balance(db: Session = Depends(get_db)):
+    balance = db.query(Balance).order_by(desc(Balance.id)).first()
+
+    if not balance:
+        return {
+            "previous_cost": 0,
+            "current_cost": 0,
+            "previous_due": 0,
+            "current_due": 0,
+            "previous_balance": 0,
+            "current_balance": 0,
+        }
+
+    return jsonable_encoder(balance)
+
+
+
+@Transaction_router.get(
+    "/pcplus/api/accounts/monthly-chart",
+    dependencies=[Depends(get_current_active_user)]
+)
+async def monthly_chart(db: Session = Depends(get_db)):
+
+    investment_rows = (
+        db.query(
+            extract("month", Transaction.transaction_date).label("month"),
+            func.sum(Transaction.amount_in).label("amount_in"),
+            func.sum(Transaction.return_amount).label("return_amount"),
+        )
+        .filter(Transaction.transaction_type == "Office_Investment")
+        .group_by(extract("month", Transaction.transaction_date))
+        .all()
+    )
+
+    income_rows = (
+        db.query(
+            extract("month", Transaction.transaction_date).label("month"),
+            func.sum(Transaction.amount_in).label("amount_in"),
+            func.sum(Transaction.return_amount).label("return_amount"),
+        )
+        .filter(Transaction.transaction_type == "Service_Sales")
+        .group_by(extract("month", Transaction.transaction_date))
+        .all()
+    )
+
+    expense_rows = (
+        db.query(
+            extract("month", Transaction.transaction_date).label("month"),
+            func.sum(Transaction.amount_out).label("amount_out"),
+        )
+        .group_by(extract("month", Transaction.transaction_date))
+        .all()
+    )
+
+    officeInvestment = [0] * 12
+    income = [0] * 12
+    expenses = [0] * 12
+    profit = [0] * 12
+
+    # Office Investment
+    for row in investment_rows:
+        idx = int(row.month) - 1
+
+        officeInvestment[idx] = round(
+            float(row.amount_in or 0)
+            + float(row.return_amount or 0),
+            2
+        )
+
+    # Service Sales Income
+    for row in income_rows:
+        idx = int(row.month) - 1
+
+        total_income = (
+            float(row.amount_in or 0)
+            + float(row.return_amount or 0)
+        )
+
+        income[idx] = round(total_income, 2)
+
+        # Profit = Income
+        profit[idx] = round(total_income, 2)
+
+    # Expenses
+    for row in expense_rows:
+        idx = int(row.month) - 1
+
+        expenses[idx] = round(
+            float(row.amount_out or 0),
+            2
+        )
+
+    return {
+        "office_investment": officeInvestment,
+        "income": income,
+        "expenses": expenses,
+        "profit": profit,
+    }
+
+
+
+@Transaction_router.get("/pcplus/api/accounts/cost-pie-chart",
+    dependencies=[Depends(get_current_active_user)]
+)
+async def cost_pie_chart(db: Session = Depends(get_db)):
+    today = date.today()
+
+    start_this_week = today - timedelta(days=today.weekday())
+
+    start_this_month = today.replace(day=1)
+
+    last_month_end = start_this_month - timedelta(days=1)
+    last_month_start = last_month_end.replace(day=1)
+
+    today_cost = db.query(func.sum(Transaction.amount_out)).filter(
+        Transaction.transaction_date == today
+    ).scalar() or 0
+
+    this_week = db.query(func.sum(Transaction.amount_out)).filter(
+        Transaction.transaction_date >= start_this_week,
+        Transaction.transaction_date <= today
+    ).scalar() or 0
+
+    this_month = db.query(func.sum(Transaction.amount_out)).filter(
+        Transaction.transaction_date >= start_this_month,
+        Transaction.transaction_date <= today
+    ).scalar() or 0
+
+    last_month = db.query(func.sum(Transaction.amount_out)).filter(
+        Transaction.transaction_date >= last_month_start,
+        Transaction.transaction_date <= last_month_end
+    ).scalar() or 0
+
+    return {
+        "series": [
+            round(float(today_cost), 2),
+            round(float(this_week), 2),
+            round(float(this_month), 2),
+            round(float(last_month), 2),
+        ],
+        "labels": ["Today", "This Week", "This Month", "Last Month"]
+    }

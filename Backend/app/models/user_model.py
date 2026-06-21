@@ -26,6 +26,7 @@ class UserCreateSchema(BaseModel):
     user_phone:str
     user_email:str
     user_password:str
+    office_token: str
     class Config:
         from_attributes = True
 

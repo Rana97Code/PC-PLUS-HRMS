@@ -63,7 +63,7 @@ const AddServiceSales: React.FC = () => {
 
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get('http://localhost:8080/bmitvat/api/supplier/all_supplier', { headers })
+            axios.get('http://localhost:8080/pcplusvat/api/supplier/all_supplier', { headers })
                 .then((response) => {
                     setAllSupplier(response.data);
                 })
@@ -84,7 +84,7 @@ const AddServiceSales: React.FC = () => {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get(`http://localhost:8080/bmitvat/api/supplier/get_supplier/${selectedOptionId}`, { headers })
+            axios.get(`http://localhost:8080/pcplusvat/api/supplier/get_supplier/${selectedOptionId}`, { headers })
                 .then((response) => {
                     const data = response.data;
                     setSupplier(data.id)
@@ -126,7 +126,7 @@ const AddServiceSales: React.FC = () => {
 
             const searchTerm = fiscalYear + '/' + searchInput.value;
             try {
-                const response = await axios.post('http://localhost:8080/bmitvat/api/item/getItemSuggestions', searchTerm, { headers });
+                const response = await axios.post('http://localhost:8080/pcplusvat/api/item/getItemSuggestions', searchTerm, { headers });
                 // <string[]>
                 const suggestions = response.data;
                 setSuggestItem(suggestions);
@@ -167,7 +167,7 @@ const AddServiceSales: React.FC = () => {
                                 const bearer = JSON.parse(token);
                                 const headers = { Authorization: `Bearer ${bearer}` }
 
-                                axios.get(`http://localhost:8080/bmitvat/api/purchase/get_item_details/${clickedValue}`, { headers })
+                                axios.get(`http://localhost:8080/pcplusvat/api/purchase/get_item_details/${clickedValue}`, { headers })
                                     .then((response) => {
                                         const data = response.data;
                                         setItemDetails(data);
@@ -708,7 +708,7 @@ const AddServiceSales: React.FC = () => {
                 try {
                     // process.exit();
 
-                    await axios.post("http://localhost:8080/bmitvat/api/purchase/add-local-purchase", purchase, { headers })
+                    await axios.post("http://localhost:8080/pcplusvat/api/purchase/add-local-purchase", purchase, { headers })
                         .then(function (response) {
                             navigate("/pages/procurment/local_purchase/index");
                         })

@@ -20,7 +20,7 @@ const index = () => {
 
 const col = ['nidImage', 'userID', 'email', 'phone', 'nid', 'terminationDate', 'terminationReason'];
     useEffect(() => {
-        axios.get('http://localhost:8080/bmitvat/api/v1/unit/allunits')
+        axios.get('http://localhost:8080/pcplusvat/api/v1/unit/allunits')
             .then((response) => {
                 setInitialRecords(response.data);
 

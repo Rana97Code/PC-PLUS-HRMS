@@ -128,7 +128,7 @@ const index = () => {
            const headers= { Authorization: `Bearer ${bearer}`,'content-type': 'multipart/form-data' }
            // console.log(headers);
    
-         await axios.post('http://localhost:8080/bmitvat/api/customhouse/upload_custom_house_excel', file, {headers})
+         await axios.post('http://localhost:8080/pcplusvat/api/customhouse/upload_custom_house_excel', file, {headers})
          .then(function (response){
            console.log("Data Inserted");
            if(response.status==200){

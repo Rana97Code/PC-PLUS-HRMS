@@ -155,7 +155,7 @@ export default cpcEdit;
 //             const bearer = JSON.parse(token);
 //             const headers= { Authorization: `Bearer ${bearer}` }
 
-//         await axios.get(`http://localhost:8080/bmitvat/api/cpc/get_cpc/${params.id}`,{headers})
+//         await axios.get(`http://localhost:8080/pcplusvat/api/cpc/get_cpc/${params.id}`,{headers})
 //             .then((response) => {
 //                 // setInitialRecords(response.data);
 //                 const data = response.data;
@@ -190,7 +190,7 @@ export default cpcEdit;
 
 //         try {
 //             console.log(costing);
-//            await axios.put(`http://localhost:8080/bmitvat/api/cpc/update_cpc/${params.id}`, costing, {headers})
+//            await axios.put(`http://localhost:8080/pcplusvat/api/cpc/update_cpc/${params.id}`, costing, {headers})
 //           .then(function (response){
 //             if(response){
 //               navigate("/pages/cpccode/list");

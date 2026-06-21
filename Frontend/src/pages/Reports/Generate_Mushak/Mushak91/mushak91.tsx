@@ -52,7 +52,7 @@ const mushak91: React.FC = () => {
 
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get('http://localhost:8080/bmitvat/api/mushak91/rawmaterial', { headers })
+            axios.get('http://localhost:8080/pcplusvat/api/mushak91/rawmaterial', { headers })
                 .then((response) => {
                     setLcDate(response.data);
                 })

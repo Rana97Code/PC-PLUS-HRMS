@@ -71,7 +71,7 @@ const AddDebitNote: React.FC = () => {
 
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get('http://localhost:8080/bmitvat/api/debit_note/get_purchase_suppliers', { headers })
+            axios.get('http://localhost:8080/pcplusvat/api/debit_note/get_purchase_suppliers', { headers })
                 .then((response) => {
                     setAllSupplier(response.data);
 
@@ -93,7 +93,7 @@ const AddDebitNote: React.FC = () => {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get(`http://localhost:8080/bmitvat/api/debit_note/get_supplier_chalan/${selectedOptionId}`, { headers })
+            axios.get(`http://localhost:8080/pcplusvat/api/debit_note/get_supplier_chalan/${selectedOptionId}`, { headers })
                 .then((response) => {
                     const data = response.data;
                     // setSupplierPurchase(data)
@@ -130,7 +130,7 @@ const AddDebitNote: React.FC = () => {
                 const bearer = JSON.parse(token);
                 const headers = { Authorization: `Bearer ${bearer}` }
 
-                axios.get(`http://localhost:8080/bmitvat/api/debit_note/get_purchase_details/${challanId}`, { headers })
+                axios.get(`http://localhost:8080/pcplusvat/api/debit_note/get_purchase_details/${challanId}`, { headers })
                     .then((response) => {
                         const data = response.data;
                         // setItemDetails(data);
@@ -467,7 +467,7 @@ const AddDebitNote: React.FC = () => {
                 const bearer = JSON.parse(token);
                 const headers = { Authorization: `Bearer ${bearer}` }
                 try {
-                    await axios.post("http://localhost:8080/bmitvat/api/debit_note/add_debit_note", debitNote, { headers })
+                    await axios.post("http://localhost:8080/pcplusvat/api/debit_note/add_debit_note", debitNote, { headers })
                         .then(function (response) {
                             navigate("/pages/procurment/debitNote/index");
                         })

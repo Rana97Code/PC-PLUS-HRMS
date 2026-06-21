@@ -20,7 +20,7 @@ const AddCurrency = () => {
             updatedBy: '0'
         }
         try {
-            const data = await axios.post("http://localhost:8080/bmitvat/api/v1/currency", currency)
+            const data = await axios.post("http://localhost:8080/pcplusvat/api/v1/currency", currency)
                 .then(function (response) {
                     console.log(response);
                     navigate("/pages/settings/currency");

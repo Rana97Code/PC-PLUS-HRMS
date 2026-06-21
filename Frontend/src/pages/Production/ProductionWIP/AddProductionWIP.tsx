@@ -57,7 +57,7 @@ const AddProductionWIP: React.FC = () => {
 
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get('http://localhost:8080/bmitvat/api/production-bom/all_bom_item', { headers })
+            axios.get('http://localhost:8080/pcplusvat/api/production-bom/all_bom_item', { headers })
                 .then((response) => {
                     setAllBomItem(response.data);
 
@@ -88,7 +88,7 @@ const AddProductionWIP: React.FC = () => {
                     const bearer = JSON.parse(token);
                     const headers = { Authorization: `Bearer ${bearer}` }
 
-                    axios.get(`http://localhost:8080/bmitvat/api/production-bom/bom_all_item_details/${bomId}`, { headers })
+                    axios.get(`http://localhost:8080/pcplusvat/api/production-bom/bom_all_item_details/${bomId}`, { headers })
                         .then((response) => {
                             const dataArray = response.data;
                             // setItemDetails(dataArray);
@@ -330,7 +330,7 @@ const AddProductionWIP: React.FC = () => {
             const headers = { Authorization: `Bearer ${bearer1}` }
 
             try {
-                await axios.post("http://localhost:8080/bmitvat/api/production-wip/create_production", items, { headers })
+                await axios.post("http://localhost:8080/pcplusvat/api/production-wip/create_production", items, { headers })
                     .then(function (response) {
                         if (response) {
                             navigate("/pages/production_wip/index");

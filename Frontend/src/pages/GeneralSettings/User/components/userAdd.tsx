@@ -51,7 +51,7 @@ if(nidScan && profileImage){
   try {
     console.warn(formData);
     const headers= { 'Content-Type': 'multipart/form-data'  }
-     await axios.post("http://localhost:8080/bmitvat/api/register", formData, {headers})
+     await axios.post("http://localhost:8080/pcplusvat/api/register", formData, {headers})
       .then(function (response) {
         console.log(response);
         navigate("/pages/user/index");

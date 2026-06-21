@@ -47,26 +47,48 @@ def create_token(data: dict, expires_delta: timedelta | None = None):
     # return dict(access_token=encoded_jwt, token_type="bearer")
     return encoded_jwt
 
-
+OFFICE_VERIFY_TOKEN = "office34"
 
 @auth_router.post("/pcplus/api/create_user")
-async def create(user:UserCreateSchema,db:Session=Depends(get_db)): #data field define using schema and session manage
+async def create(user: UserCreateSchema, db: Session = Depends(get_db)):
 
-    u_email = get_user_by_email(user_email=user.user_email, db=db)
+    if user.office_token != OFFICE_VERIFY_TOKEN:
+        raise HTTPException(
+            status_code=403,
+            detail="Invalid office verification token"
+        )
+
+    u_email = get_user_by_email(
+        user_email=user.user_email,
+        db=db
+    )
+
     if u_email:
         raise HTTPException(
-            status_code=400, detail="This user email already exists"
+            status_code=400,
+            detail="This user email already exists"
         )
- 
-    #for password hashing
+
     hash_password = _hash.bcrypt.hash(user.user_password)
-    srv=User(user_name=user.user_name,user_phone=user.user_phone,user_email=user.user_email,user_password=hash_password,confirm_password=hash_password)
+
+    srv = User(
+        user_name=user.user_name,
+        user_phone=user.user_phone,
+        user_email=user.user_email,
+        user_password=hash_password,
+        confirm_password=hash_password
+    )
 
     db.add(srv)
     db.commit()
     db.refresh(srv)
+
     access_token_expires = timedelta(minutes=55)
-    return create_token( {"user_email": user.user_email}, expires_delta=access_token_expires )
+
+    return create_token(
+        {"user_email": user.user_email},
+        expires_delta=access_token_expires
+    )
 
 
 def authenticate_user(user_email: str, user_password: str, db:Session=Depends(get_db)):

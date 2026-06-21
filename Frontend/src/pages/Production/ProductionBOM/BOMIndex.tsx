@@ -19,7 +19,7 @@ const BOMIndex = () => {
             const bearer = JSON.parse(token);
             const headers= { Authorization: `Bearer ${bearer}` }
   
-        axios.get('http://localhost:8080/bmitvat/api/production-bom/get_all_bom', {headers})
+        axios.get('http://localhost:8080/pcplusvat/api/production-bom/get_all_bom', {headers})
             .then((response) => {
                 setInitialRecords(response.data);
 
@@ -83,7 +83,7 @@ const BOMIndex = () => {
             const bearer = JSON.parse(token);
             const headers= { Authorization: `Bearer ${bearer}` }
   
-        await axios.get(`http://localhost:8080/bmitvat/api/production-bom/activate_bom/${clickedId}`, {headers})
+        await axios.get(`http://localhost:8080/pcplusvat/api/production-bom/activate_bom/${clickedId}`, {headers})
             .then((response) => {
                 if(response.status == 200){
                     window.location.reload();

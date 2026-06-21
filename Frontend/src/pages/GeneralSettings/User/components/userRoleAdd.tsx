@@ -16,7 +16,7 @@ const userRoleAdd = () => {
             updatedBy: '0'
         }
         try {
-            const data = await axios.post("http://localhost:8080/bmitvat/api/v1/unit", units)
+            const data = await axios.post("http://localhost:8080/pcplusvat/api/v1/unit", units)
                 .then(function (response) {
                     console.log(response);
                     navigate("/pages/settings/unit");

@@ -92,7 +92,7 @@ const AddCreditNote: React.FC = () => {
 
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get('http://localhost:8080/bmitvat/api/customer/all_customer', { headers })
+            axios.get('http://localhost:8080/pcplusvat/api/customer/all_customer', { headers })
                 .then((response) => {
                     setAllCustomer(response.data);
                 })
@@ -113,7 +113,7 @@ const AddCreditNote: React.FC = () => {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get(`http://localhost:8080/bmitvat/api/customer/get_customer/${selectedOptionId}`, { headers })
+            axios.get(`http://localhost:8080/pcplusvat/api/customer/get_customer/${selectedOptionId}`, { headers })
                 .then((response) => {
                     const data = response.data;
                     setCustomer(data.id)
@@ -154,7 +154,7 @@ const AddCreditNote: React.FC = () => {
 
             const searchTerm = fiscalYear + '/' + searchInput.value;
             try {
-                const response = await axios.post('http://localhost:8080/bmitvat/api/item/getItemSuggestions', searchTerm, { headers });
+                const response = await axios.post('http://localhost:8080/pcplusvat/api/item/getItemSuggestions', searchTerm, { headers });
                 // <string[]>
                 const suggestions = response.data;
                 setSuggestItem(suggestions);
@@ -195,7 +195,7 @@ const AddCreditNote: React.FC = () => {
                                 const bearer = JSON.parse(token);
                                 const headers = { Authorization: `Bearer ${bearer}` }
 
-                                axios.get(`http://localhost:8080/bmitvat/api/purchase/get_item_details/${clickedValue}`, { headers })
+                                axios.get(`http://localhost:8080/pcplusvat/api/purchase/get_item_details/${clickedValue}`, { headers })
                                     .then((response) => {
                                         const data = response.data;
                                         setItemDetails(data);
@@ -733,7 +733,7 @@ const AddCreditNote: React.FC = () => {
                 try {
                     // process.exit();
 
-                    await axios.post("http://localhost:8080/bmitvat/api/purchase/add-local-purchase", purchase, { headers })
+                    await axios.post("http://localhost:8080/pcplusvat/api/purchase/add-local-purchase", purchase, { headers })
                         .then(function (response) {
                             navigate("/pages/procurment/local_purchase/index");
                         })

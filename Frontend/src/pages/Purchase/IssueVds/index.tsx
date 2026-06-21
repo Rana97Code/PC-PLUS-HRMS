@@ -17,7 +17,7 @@ const index = () => {
         if (token) {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
-        axios.get('http://localhost:8080/bmitvat/api/issueVds/allIssueVds', { headers })
+        axios.get('http://localhost:8080/pcplusvat/api/issueVds/allIssueVds', { headers })
             .then((response) => {
                 setInitialRecords(response.data);
 

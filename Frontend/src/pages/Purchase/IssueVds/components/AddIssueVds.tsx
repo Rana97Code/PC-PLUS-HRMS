@@ -65,7 +65,7 @@ const AddIssueVds: React.FC = () => {
 
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get('http://localhost:8080/bmitvat/api/issueVds/issueVdsSupplier', { headers })
+            axios.get('http://localhost:8080/pcplusvat/api/issueVds/issueVdsSupplier', { headers })
                 .then((response) => {
                     setAllSupplier(response.data);
                 })
@@ -92,7 +92,7 @@ const AddIssueVds: React.FC = () => {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get(`http://localhost:8080/bmitvat/api/debit_note/get_supplier_chalan/${selectedOptionId}`, { headers })
+            axios.get(`http://localhost:8080/pcplusvat/api/debit_note/get_supplier_chalan/${selectedOptionId}`, { headers })
                 .then((response) => {
                     const data = response.data;
 
@@ -147,7 +147,7 @@ const AddIssueVds: React.FC = () => {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get(`http://localhost:8080/bmitvat/api/issueVds/get_chalan_purchase/${selectedOptionId}`, { headers })
+            axios.get(`http://localhost:8080/pcplusvat/api/issueVds/get_chalan_purchase/${selectedOptionId}`, { headers })
                 .then((response) => {
                     const data = response.data;
                     addRow(data);
@@ -454,7 +454,7 @@ const AddIssueVds: React.FC = () => {
                 const bearer = JSON.parse(token);
                 const headers = { Authorization: `Bearer ${bearer}` }
                 try {
-                    await axios.post("http://localhost:8080/bmitvat/api/issueVds/add-issue-vds", purchase, { headers })
+                    await axios.post("http://localhost:8080/pcplusvat/api/issueVds/add-issue-vds", purchase, { headers })
                         .then(function (response) {
                             navigate("/pages/procurment/issueVds/index");
                         })

@@ -62,7 +62,7 @@ const AddIssueVds: React.FC = () => {
 
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get('http://localhost:8080/bmitvat/api/receiveVds/receiveVdsCustomer', { headers })
+            axios.get('http://localhost:8080/pcplusvat/api/receiveVds/receiveVdsCustomer', { headers })
                 .then((response) => {
                     setAllCustomer(response.data);
                 })
@@ -91,7 +91,7 @@ const AddIssueVds: React.FC = () => {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get(`http://localhost:8080/bmitvat/api/receiveVds/get_customer_chalan/${selectedOptionId}`, { headers })
+            axios.get(`http://localhost:8080/pcplusvat/api/receiveVds/get_customer_chalan/${selectedOptionId}`, { headers })
                 .then((response) => {
                     const data = response.data;
 
@@ -149,7 +149,7 @@ const AddIssueVds: React.FC = () => {
                                     const bearer = JSON.parse(token);
                                     const headers = { Authorization: `Bearer ${bearer}` }
 
-                                    axios.get(`http://localhost:8080/bmitvat/api/receiveVds/get_chalan_sales/${selectedOptionId}`, { headers })
+                                    axios.get(`http://localhost:8080/pcplusvat/api/receiveVds/get_chalan_sales/${selectedOptionId}`, { headers })
                                         .then((response) => {
                                             const data = response.data;
                                             addRow(data);
@@ -479,7 +479,7 @@ const AddIssueVds: React.FC = () => {
                 const bearer = JSON.parse(token);
                 const headers = { Authorization: `Bearer ${bearer}` }
                 try {
-                    await axios.post("http://localhost:8080/bmitvat/api/receiveVds/add_receive_vds", purchase, { headers })
+                    await axios.post("http://localhost:8080/pcplusvat/api/receiveVds/add_receive_vds", purchase, { headers })
                         .then(function (response) {
                             navigate("/pages/sales/receiveVds/index");
                         })

@@ -23,7 +23,7 @@ const index = () => {
 
 const col = ['nidImage', 'userID', 'email', 'phone', 'nid', 'terminationDate', 'terminationReason'];
     useEffect(() => {
-        axios.get(`${baseUrl}/bmitvat/api/v1/unit/allunits`)
+        axios.get(`${baseUrl}/pcplusvat/api/v1/unit/allunits`)
             .then((response) => {
                 setInitialRecords(response.data);
 

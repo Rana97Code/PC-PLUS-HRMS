@@ -1,5 +1,5 @@
-import React, { useContext, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useContext, useState, useEffect } from 'react';
+import { Link,NavLink, useNavigate } from 'react-router-dom';
 import { IRootState } from '../../store';
 import IconMail from '../../components/Icon/IconMail';
 import IconLockDots from '../../components/Icon/IconLockDots';
@@ -12,14 +12,15 @@ const LoginCover = () => {
 
     const user = useContext(UserContex);
     const baseUrl = user.base_url;
-    if (user.email) {
-        navigate("/index");
-    }
 
     const [username, setUser] = useState("")
     const [password, setPassword] = useState("")
 
-
+    useEffect(() => {
+        if (user?.email) {
+            navigate('/index');
+        }
+    }, [user?.email, navigate]);
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -99,11 +100,23 @@ const LoginCover = () => {
                                 </div>
                                 {/* <Link  type="submit" className="btn btn-gradient !mt-6 w-full border-0 uppercase shadow-[0_10px_20px_-10px_rgba(67,97,238,0.44)]"> */}
                                 <button type='submit' className="btn bg-[linear-gradient(225deg,rgba(0,18,98,1)_0%,rgba(32,4,238,1)_100%)] !mt-6 w-full border-0 uppercase text-white">Sign in</button>
+                                
+                                <div className="relative my-7 text-center md:mb-9">
+                                    <span className="absolute inset-x-0 top-1/2 h-px w-full -translate-y-1/2 bg-white-light dark:bg-white-dark"></span>
+                                    <span className="relative bg-white px-2 font-bold uppercase text-white-dark dark:bg-dark dark:text-white-light">or</span>
+                                </div>
 
-                                {/* </Link> */}
+                            <div className="text-center dark:text-white">
+                                I don't have an account ?&nbsp;
+                                <NavLink to="/register" className="uppercase text-primary underline transition hover:text-black dark:hover:text-white">
+                                    SIGN UP
+                                </NavLink>
+                            </div>
+
+
                             </form>
                         </div>
-                        <p className="absolute bottom-6 w-full text-center dark:text-white">© {new Date().getFullYear()}.BMIT All Rights Reserved.</p>
+                        <p className="absolute bottom-6 w-full text-center dark:text-white">© {new Date().getFullYear()}.PC PLUS Solution All Rights Reserved.</p>
                     </div>
                 </div>
             </div>

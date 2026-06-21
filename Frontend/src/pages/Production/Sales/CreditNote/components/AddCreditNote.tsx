@@ -72,7 +72,7 @@ const AddDebitNote: React.FC = () => {
 
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get('http://localhost:8080/bmitvat/api/credit_note/get_sales_customers', { headers })
+            axios.get('http://localhost:8080/pcplusvat/api/credit_note/get_sales_customers', { headers })
                 .then((response) => {
                     setAllCustomer(response.data);
 
@@ -94,7 +94,7 @@ const AddDebitNote: React.FC = () => {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get(`http://localhost:8080/bmitvat/api/credit_note/get_customer_chalan/${selectedOptionId}`, { headers })
+            axios.get(`http://localhost:8080/pcplusvat/api/credit_note/get_customer_chalan/${selectedOptionId}`, { headers })
                 .then((response) => {
                     const data = response.data;
                     // setSupplierPurchase(data)
@@ -130,7 +130,7 @@ const AddDebitNote: React.FC = () => {
                                 const bearer = JSON.parse(token);
                                 const headers = { Authorization: `Bearer ${bearer}` }
 
-                                axios.get(`http://localhost:8080/bmitvat/api/credit_note/get_sales_details/${salesId}`, { headers })
+                                axios.get(`http://localhost:8080/pcplusvat/api/credit_note/get_sales_details/${salesId}`, { headers })
                                     .then((response) => {
                                         const data = response.data;
                                         // setItemDetails(data);
@@ -469,7 +469,7 @@ const AddDebitNote: React.FC = () => {
                 const bearer = JSON.parse(token);
                 const headers = { Authorization: `Bearer ${bearer}` }
                 try {
-                    await axios.post("http://localhost:8080/bmitvat/api/credit_note/add_credit_note", creditNote, { headers })
+                    await axios.post("http://localhost:8080/pcplusvat/api/credit_note/add_credit_note", creditNote, { headers })
                         .then(function (response) {
                             navigate("/pages/sales/creditNote/index");
                         })

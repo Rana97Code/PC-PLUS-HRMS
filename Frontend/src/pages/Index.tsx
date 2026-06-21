@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState, useContext } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState } from '../store';
 import ReactApexChart from 'react-apexcharts';
@@ -20,31 +20,103 @@ import IconBolt from '../components/Icon/IconBolt';
 import IconCaretDown from '../components/Icon/IconCaretDown';
 import IconPlus from '../components/Icon/IconPlus';
 import IconMultipleForwardRight from '../components/Icon/IconMultipleForwardRight';
+import UserContext from '../context/UserContex';
+import axios from 'axios';
+
 
 const Index = () => {
+    const user = useContext(UserContext);
+    const headers = user.headers;
+    const baseUrl = user.base_url;
+
     const dispatch = useDispatch();
-    useEffect(() => {
-        dispatch(setPageTitle('Sales Admin'));
-    });
+
     const isDark = useSelector((state: IRootState) => state.themeConfig.theme === 'dark' || state.themeConfig.isDarkMode);
-    const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
+    const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl';
 
     const [loading] = useState(false);
 
-    //Revenue Chart
+    const defaultMonthlyData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    const [chartData, setChartData] = useState({
+        office_investment: defaultMonthlyData,
+        income: defaultMonthlyData,
+        expenses: defaultMonthlyData,
+        profit: defaultMonthlyData,
+    });
+
+    const [costPieData, setCostPieData] = useState({
+        series: [0, 0, 0, 0],
+        labels: ['Today', 'This Week', 'This Month', 'Last Month'],
+    });
+
+    useEffect(() => {
+        dispatch(setPageTitle('Sales Admin'));
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (!baseUrl || !headers) return;
+
+        axios
+            .get(`${baseUrl}/accounts/monthly-chart`, { headers })
+            .then((response) => {
+                setChartData({
+                    office_investment: response.data?.office_investment || defaultMonthlyData,
+                    income: response.data?.income || defaultMonthlyData,
+                    expenses: response.data?.expenses || defaultMonthlyData,
+                    profit: response.data?.profit || defaultMonthlyData,
+                });
+            })
+            .catch((error) => {
+                console.error('Monthly chart error:', error);
+            });
+
+        axios
+            .get(`${baseUrl}/accounts/cost-pie-chart`, { headers })
+            .then((response) => {
+                setCostPieData({
+                    series: response.data?.series || [0, 0, 0, 0],
+                    labels: response.data?.labels || ['Today', 'This Week', 'This Month', 'Last Month'],
+                });
+            })
+            .catch((error) => {
+                console.error('Cost pie chart error:', error);
+            });
+    }, [baseUrl, headers]);
+
+    const costSeries = costPieData?.series || [0, 0, 0, 0];
+    const costLabels = costPieData?.labels || ['Today', 'This Week', 'This Month', 'Last Month'];
+
+    const totalExpense = costSeries.reduce((sum: number, value: number) => {
+        return sum + Number(value || 0);
+    }, 0);
+
+    const getPercent = (value: number) => {
+        if (totalExpense === 0) return '0%';
+        return `${Math.round((Number(value || 0) / totalExpense) * 100)}%`;
+    };
+
+    const formatTk = (value: number) => {
+        return `Tk${Number(value || 0).toLocaleString()}`;
+    };
+
     const revenueChart: any = {
         series: [
             {
+                name: 'Office Investment',
+                data: chartData.office_investment || defaultMonthlyData,
+            },
+            {
                 name: 'Income',
-                data: [16800, 16800, 15500, 27800, 15500, 17000, 19000, 16000, 15000, 17000, 14000, 17000],
+                data: chartData.income || defaultMonthlyData,
             },
             {
                 name: 'Expenses',
-                data: [16500, 17500, 16200, 17300, 16000, 19500, 16000, 17000, 16000, 2000, 18000, 19000],
+                data: chartData.expenses || defaultMonthlyData,
             },
             {
                 name: 'Profit',
-                data: [26500, 17500, 16200, 7300, 16000, 19500, 36000, 17000, 16000, 29000, 18000, 19000],
+                data: chartData.profit || defaultMonthlyData,
             },
         ],
         options: {
@@ -59,7 +131,6 @@ const Index = () => {
                     show: false,
                 },
             },
-
             dataLabels: {
                 enabled: false,
             },
@@ -76,27 +147,36 @@ const Index = () => {
                 left: -7,
                 top: 22,
             },
-            colors: isDark ? ['#2196F3', '#E7515A', '#07515A'] : ['#1B55E2', '#E7515A', '#07515A'],
+            colors: isDark
+                ? ['#805DCA', '#00AB55', '#E7515A', '#2196F3']
+                : ['#805DCA', '#00AB55', '#E7515A', '#2196F3'],
             markers: {
                 discrete: [
                     {
                         seriesIndex: 0,
                         dataPointIndex: 3,
-                        fillColor: '#1B55E2',
+                        fillColor: '#805DCA',
                         strokeColor: 'transparent',
                         size: 7,
                     },
                     {
                         seriesIndex: 1,
+                        dataPointIndex: 6,
+                        fillColor: '#00AB55',
+                        strokeColor: 'transparent',
+                        size: 7,
+                    },
+                    {
+                        seriesIndex: 2,
                         dataPointIndex: 9,
                         fillColor: '#E7515A',
                         strokeColor: 'transparent',
                         size: 7,
                     },
                     {
-                        seriesIndex: 2,
+                        seriesIndex: 3,
                         dataPointIndex: 6,
-                        fillColor: '#07515A',
+                        fillColor: '#2196F3',
                         strokeColor: 'transparent',
                         size: 7,
                     },
@@ -135,7 +215,7 @@ const Index = () => {
                         cssClass: 'apexcharts-yaxis-title',
                     },
                 },
-                opposite: isRtl ? true : false,
+                opposite: isRtl,
             },
             grid: {
                 borderColor: isDark ? '#191E3A' : '#E0E6ED',
@@ -183,7 +263,7 @@ const Index = () => {
                 type: 'gradient',
                 gradient: {
                     shadeIntensity: 1,
-                    inverseColors: !1,
+                    inverseColors: false,
                     opacityFrom: isDark ? 0.19 : 0.28,
                     opacityTo: 0.05,
                     stops: isDark ? [100, 100] : [45, 100],
@@ -192,9 +272,8 @@ const Index = () => {
         },
     };
 
-    //Sales By Category
-    const salesByCategory: any = {
-        series: [985, 737, 270],
+    const costByCategory: any = {
+        series: costSeries,
         options: {
             chart: {
                 type: 'donut',
@@ -209,7 +288,9 @@ const Index = () => {
                 width: 25,
                 colors: isDark ? '#0e1726' : '#fff',
             },
-            colors: isDark ? ['#5c1ac3', '#e2a03f', '#e7515a', '#e2a03f'] : ['#e2a03f', '#5c1ac3', '#e7515a'],
+            colors: isDark
+                ? ['#2196F3', '#5c1ac3', '#e2a03f', '#e7515a']
+                : ['#2196F3', '#5c1ac3', '#e2a03f', '#e7515a'],
             legend: {
                 position: 'bottom',
                 horizontalAlign: 'center',
@@ -240,25 +321,25 @@ const Index = () => {
                                 color: isDark ? '#bfc9d4' : undefined,
                                 offsetY: 16,
                                 formatter: (val: any) => {
-                                    return val;
+                                    return Number(val || 0).toFixed(2);
                                 },
                             },
                             total: {
                                 show: true,
-                                label: 'Total',
+                                label: 'Total Expense',
                                 color: '#888ea8',
                                 fontSize: '29px',
                                 formatter: (w: any) => {
-                                    return w.globals.seriesTotals.reduce(function (a: any, b: any) {
-                                        return a + b;
-                                    }, 0);
+                                    return w.globals.seriesTotals
+                                        .reduce((a: any, b: any) => a + b, 0)
+                                        .toFixed(2);
                                 },
                             },
                         },
                     },
                 },
             },
-            labels: ['Apparel', 'Sports', 'Others'],
+            labels: costLabels,
             states: {
                 hover: {
                     filter: {
@@ -275,7 +356,6 @@ const Index = () => {
             },
         },
     };
-
     //Daily Sales
     const dailySales: any = {
         series: [
@@ -429,7 +509,7 @@ const Index = () => {
                 <div className="grid xl:grid-cols-3 gap-6 mb-6">
                     <div className="panel h-full xl:col-span-2">
                         <div className="flex items-center justify-between dark:text-white-light mb-5">
-                            <h5 className="font-semibold text-lg">Revenue</h5>
+                            <h5 className="font-semibold text-lg">Revenue & Expenses</h5>
                             <div className="dropdown">
                                 <Dropdown
                                     offset={[0, 1]}
@@ -451,7 +531,7 @@ const Index = () => {
                             </div>
                         </div>
                         <p className="text-lg dark:text-white-light/90">
-                            Total Profit <span className="text-primary ml-2">Tk5,30,677</span>
+                            Total Office Summary<span className="text-primary ml-2">{"Investment : " + chartData.office_investment.reduce((a: number, b: number) => a + b, 0) + ", Expenses : " + chartData.expenses.reduce((a: number, b: number) => a + b, 0) + ", Revenue : " + (chartData.income.reduce((a: number, b: number) => a + b, 0) - chartData.expenses.reduce((a: number, b: number) => a + b, 0))}</span>
                         </p>
                         <div className="relative">
                             <div className="bg-white dark:bg-black rounded-lg overflow-hidden">
@@ -466,9 +546,125 @@ const Index = () => {
                         </div>
                     </div>
 
+
                     <div className="panel h-full">
+                        
+                        <div className="flex items-center justify-between dark:text-white-light mb-5">
+                            <h5 className="font-semibold text-lg">Expense Summary</h5>
+
+                            <div className="dropdown">
+                                <Dropdown
+                                    placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}
+                                    button={<IconHorizontalDots className="w-5 h-5 text-black/70 dark:text-white/70 hover:!text-primary" />}
+                                >
+                                    <ul>
+                                        <li>
+                                            <button type="button">View Report</button>
+                                        </li>
+                                    </ul>
+                                </Dropdown>
+                            </div>
+                        </div>
+
+                        <div className="space-y-9">
+                            <div className="flex items-center">
+                                <div className="w-9 h-9 ltr:mr-3 rtl:ml-3">
+                                    <div className="bg-secondary-light dark:bg-secondary text-secondary dark:text-secondary-light rounded-full w-9 h-9 grid place-content-center">
+                                        <IconInbox />
+                                    </div>
+                                </div>
+
+                                <div className="flex-1">
+                                    <div className="flex font-semibold text-white-dark mb-2">
+                                        <h6>Today</h6>
+                                        <p className="ltr:ml-auto rtl:mr-auto">{formatTk(costPieData.series[0])}</p>
+                                    </div>
+
+                                    <div className="rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
+                                        <div
+                                            className="bg-gradient-to-r from-[#2196F3] to-[#1B55E2] h-full rounded-full"
+                                            style={{ width: getPercent(costPieData.series[0]) }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center">
+                                <div className="w-9 h-9 ltr:mr-3 rtl:ml-3">
+                                    <div className="bg-success-light dark:bg-success text-success dark:text-success-light rounded-full w-9 h-9 grid place-content-center">
+                                        <IconTag />
+                                    </div>
+                                </div>
+
+                                <div className="flex-1">
+                                    <div className="flex font-semibold text-white-dark mb-2">
+                                        <h6>This Week</h6>
+                                        <p className="ltr:ml-auto rtl:mr-auto">{formatTk(costPieData.series[1])}</p>
+                                    </div>
+
+                                    <div className="w-full rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
+                                        <div
+                                            className="bg-gradient-to-r from-[#5c1ac3] to-[#805DCA] h-full rounded-full"
+                                            style={{ width: getPercent(costPieData.series[1]) }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center">
+                                <div className="w-9 h-9 ltr:mr-3 rtl:ml-3">
+                                    <div className="bg-warning-light dark:bg-warning text-warning dark:text-warning-light rounded-full w-9 h-9 grid place-content-center">
+                                        <IconCreditCard />
+                                    </div>
+                                </div>
+
+                                <div className="flex-1">
+                                    <div className="flex font-semibold text-white-dark mb-2">
+                                        <h6>This Month</h6>
+                                        <p className="ltr:ml-auto rtl:mr-auto">{formatTk(costPieData.series[2])}</p>
+                                    </div>
+
+                                    <div className="w-full rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
+                                        <div
+                                            className="bg-gradient-to-r from-[#e2a03f] to-[#f09819] h-full rounded-full"
+                                            style={{ width: getPercent(costPieData.series[2]) }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center">
+                                <div className="w-9 h-9 ltr:mr-3 rtl:ml-3">
+                                    <div className="bg-danger-light dark:bg-danger text-danger dark:text-danger-light rounded-full w-9 h-9 grid place-content-center">
+                                        <IconCreditCard />
+                                    </div>
+                                </div>
+
+                                <div className="flex-1">
+                                    <div className="flex font-semibold text-white-dark mb-2">
+                                        <h6>Last Month</h6>
+                                        <p className="ltr:ml-auto rtl:mr-auto">{formatTk(costPieData.series[3])}</p>
+                                    </div>
+
+                                    <div className="w-full rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
+                                        <div
+                                            className="bg-gradient-to-r from-[#e7515a] to-[#ff5858] h-full rounded-full"
+                                            style={{ width: getPercent(costPieData.series[3]) }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                </div>
+
+
+                    {/* <div className="panel h-full">
                         <div className="flex items-center mb-5">
-                            <h5 className="font-semibold text-lg dark:text-white-light">Sales By Category</h5>
+                            <h5 className="font-semibold text-lg dark:text-white-light">Expenses By Category</h5>
                         </div>
                         <div>
                             <div className="bg-white dark:bg-black rounded-lg overflow-hidden">
@@ -477,15 +673,38 @@ const Index = () => {
                                         <span className="animate-spin border-2 border-black dark:border-white !border-l-transparent  rounded-full w-5 h-5 inline-flex"></span>
                                     </div>
                                 ) : (
-                                    <ReactApexChart series={salesByCategory.series} options={salesByCategory.options} type="donut" height={460} />
+                                    <ReactApexChart series={costByCategory.series} options={costByCategory.options} type="donut" height={460} />
+                                )}
+                            </div>
+                        </div>
+                    </div> */}
+
+
+
+
+
+                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
+
+                   <div className="panel h-full">
+                        <div className="flex items-center mb-5">
+                            <h5 className="font-semibold text-lg dark:text-white-light">Expenses By Category</h5>
+                        </div>
+                        <div>
+                            <div className="bg-white dark:bg-black rounded-lg overflow-hidden">
+                                {loading ? (
+                                    <div className="min-h-[325px] grid place-content-center bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] ">
+                                        <span className="animate-spin border-2 border-black dark:border-white !border-l-transparent  rounded-full w-5 h-5 inline-flex"></span>
+                                    </div>
+                                ) : (
+                                    <ReactApexChart series={costByCategory.series} options={costByCategory.options} type="donut" height={460} />
                                 )}
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
+
                     <div className="panel h-full sm:col-span-2 xl:col-span-1">
+                        
                         <div className="flex items-center mb-5">
                             <h5 className="font-semibold text-lg dark:text-white-light">
                                 Daily Sales
@@ -509,6 +728,11 @@ const Index = () => {
                             </div>
                         </div>
                     </div>
+
+
+
+
+
                     <div className="panel h-full">
                         <div className="flex items-center justify-between dark:text-white-light mb-5">
                             <h5 className="font-semibold text-lg">Summary</h5>
@@ -577,11 +801,14 @@ const Index = () => {
                                     </div>
                                     <div className="w-full rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
                                         <div className="bg-gradient-to-r from-[#f09819] to-[#ff5858] w-full h-full rounded-full" style={{ width: '80%' }}></div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
+
+                 </div>
+                </div>
+
+
 
                     <div className="panel h-full p-0">
                         <div className="flex items-center justify-between w-full p-5 absolute">
@@ -606,7 +833,9 @@ const Index = () => {
                             )}
                         </div>
                     </div>
-                </div>
+
+
+
                 <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
                     <div className="panel h-full sm:col-span-2 xl:col-span-1 pb-0">
                         <h5 className="font-semibold text-lg dark:text-white-light mb-5">Recent Activities</h5>
@@ -735,7 +964,11 @@ const Index = () => {
                             </Link>
                         </div>
                     </div>
-                    <div className="panel h-full">
+                </div>
+
+
+
+                    {/* <div className="panel h-full">
                         <div className="flex items-center justify-between dark:text-white-light mb-5">
                             <h5 className="font-semibold text-lg">Transactions</h5>
                             <div className="dropdown">
@@ -1098,10 +1331,11 @@ const Index = () => {
                                 </tbody>
                             </table>
                         </div>
-                    </div>
-                </div>
+                    </div> */}
             </div>
         </div>
+    </div>
+
     );
 };
 

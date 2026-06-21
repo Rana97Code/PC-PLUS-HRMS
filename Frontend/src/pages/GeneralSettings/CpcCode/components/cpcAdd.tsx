@@ -28,7 +28,7 @@ const costingAdd = () => {
       const headers= { Authorization: `Bearer ${bearer1}` }
   
       try {
-         await axios.post("http://localhost:8080/bmitvat/api/cpc/add-cpc", costing, {headers})
+         await axios.post("http://localhost:8080/pcplusvat/api/cpc/add-cpc", costing, {headers})
           .then(function (response) {
             if(response){
             //   navigate("/pages/settings/c");

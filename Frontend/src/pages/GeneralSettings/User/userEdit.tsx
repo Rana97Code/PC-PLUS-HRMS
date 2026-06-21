@@ -21,7 +21,7 @@ const userEdit = () => {
       updatedBy: '0'
     }
     try {
-      const data = await axios.post(`${baseUrl}/bmitvat/api/v1/unit`, units)
+      const data = await axios.post(`${baseUrl}/pcplusvat/api/v1/unit`, units)
         .then(function (response) {
           console.log(response);
           navigate("/pages/settings/unit");

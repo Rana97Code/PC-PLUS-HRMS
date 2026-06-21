@@ -99,7 +99,7 @@ const mushak62: React.FC = () => {
 
             const headers = { Authorization: `Bearer ${bearer}` }
 
-            axios.get(`http://localhost:8080/bmitvat/api/mushak61/getItemsDetail/${params.data}`, { headers })
+            axios.get(`http://localhost:8080/pcplusvat/api/mushak61/getItemsDetail/${params.data}`, { headers })
                 .then((response) => {
                     setCompanyName(response.data.companyReportModels.companyName);
                     setCompanyAddress(response.data.companyReportModels.street);

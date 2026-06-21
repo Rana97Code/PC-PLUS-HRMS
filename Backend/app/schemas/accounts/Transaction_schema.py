@@ -14,7 +14,7 @@ class TransactionInsertSchema(BaseModel):
     due_amount: float = 0
     return_amount: float = 0
     transaction_notes: Optional[str] = None
-    created_by: Optional[int] = None
+    created_by: Optional[str] = None
 
 class TransactionUpdateSchema(BaseModel):
     transaction_date: Optional[date] = None
@@ -28,7 +28,7 @@ class TransactionUpdateSchema(BaseModel):
     due_amount: Optional[float] = None
     return_amount: Optional[float] = None
     transaction_notes: Optional[str] = None
-    updated_by: Optional[int] = None
+    updated_by: Optional[str] = None
 
 
 class TransactionFetchSchema(BaseModel):
@@ -53,9 +53,9 @@ class TransactionResponseSchema(BaseModel):
     return_amount: float
     transaction_notes: Optional[str]
     created_at: datetime
-    created_by: Optional[int]
+    created_by: Optional[str]
     updated_at: datetime
-    updated_by: Optional[int]
+    updated_by: Optional[str]
 
     class Config:
         from_attributes = True

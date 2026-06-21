@@ -75,7 +75,7 @@ const addProductionBOM: React.FC = () => {
   
         const headers= { Authorization: `Bearer ${bearer}` }
   
-        axios.get('http://localhost:8080/bmitvat/api/item/all_finish_goods_in',{headers})
+        axios.get('http://localhost:8080/pcplusvat/api/item/all_finish_goods_in',{headers})
             .then((response) => {
                 setAllFinishGoods(response.data);
   
@@ -98,7 +98,7 @@ const addProductionBOM: React.FC = () => {
             const bearer = JSON.parse(token);
             const headers= { Authorization: `Bearer ${bearer}` }
   
-         axios.get(`http://localhost:8080/bmitvat/api/item/get_item_details/${selectedOptionId}`,{headers})
+         axios.get(`http://localhost:8080/pcplusvat/api/item/get_item_details/${selectedOptionId}`,{headers})
             .then((response) => {
                 const data = response.data;
                 setFGItem(data.id)
@@ -141,7 +141,7 @@ const addProductionBOM: React.FC = () => {
 
             const searchTerm = searchInput.value;
             try {
-                const response = await axios.post('http://localhost:8080/bmitvat/api/item/getAllRawMaterialsSuggestions', searchTerm,{headers});
+                const response = await axios.post('http://localhost:8080/pcplusvat/api/item/getAllRawMaterialsSuggestions', searchTerm,{headers});
                 // <string[]>
                 const suggestions = response.data;
                 setSuggestItem(suggestions);
@@ -182,7 +182,7 @@ const addProductionBOM: React.FC = () => {
                                 const bearer = JSON.parse(token);
                                 const headers= { Authorization: `Bearer ${bearer}` }
                     
-                            axios.get(`http://localhost:8080/bmitvat/api/production-bom/get_bom_item_details/${clickedValue}`,{headers})
+                            axios.get(`http://localhost:8080/pcplusvat/api/production-bom/get_bom_item_details/${clickedValue}`,{headers})
                                 .then((response) => {
                                     const data = response.data;
                                     //  console.log(data.itemName);
@@ -457,7 +457,7 @@ const addProductionBOM: React.FC = () => {
 
             const searchTerm = searchInput.value;
             try {
-                const response = await axios.post('http://localhost:8080/bmitvat/api/costing/getAllCostingSuggestions', searchTerm,{headers});
+                const response = await axios.post('http://localhost:8080/pcplusvat/api/costing/getAllCostingSuggestions', searchTerm,{headers});
                 // <string[]>
                 const suggestions = response.data;
                 setSuggestCosting(suggestions);
@@ -496,7 +496,7 @@ const addProductionBOM: React.FC = () => {
                                 const bearer = JSON.parse(token);
                                 const headers= { Authorization: `Bearer ${bearer}` }
                     
-                            axios.get(`http://localhost:8080/bmitvat/api/costing/get_costing/${clickedValue}`,{headers})
+                            axios.get(`http://localhost:8080/pcplusvat/api/costing/get_costing/${clickedValue}`,{headers})
                                 .then((response) => {
                                     const data = response.data;
                                     addCostingRow(data);
@@ -693,7 +693,7 @@ const addProductionBOM: React.FC = () => {
                     const bearer = JSON.parse(token);
                     const headers= { Authorization: `Bearer ${bearer}` }
                 try {
-                   await axios.post("http://localhost:8080/bmitvat/api/production-bom/add-bom", bom, {headers})
+                   await axios.post("http://localhost:8080/pcplusvat/api/production-bom/add-bom", bom, {headers})
                   .then(function (response){
                     navigate("/pages/production_bom/index");
                   })

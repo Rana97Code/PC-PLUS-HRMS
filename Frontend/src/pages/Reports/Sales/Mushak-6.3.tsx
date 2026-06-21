@@ -16,7 +16,7 @@ const LocalSalesMushuk: React.FC = () => {
         if (token) {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
-        axios.get(`http://localhost:8080/bmitvat/api/mushak63/viewReport/${params.id}`, { headers })
+        axios.get(`http://localhost:8080/pcplusvat/api/mushak63/viewReport/${params.id}`, { headers })
             .then((response) => {
                 setCompanyName(response.data.companyReportModels.companyName);
                 setCompanyBin(response.data.companyReportModels.comBin);

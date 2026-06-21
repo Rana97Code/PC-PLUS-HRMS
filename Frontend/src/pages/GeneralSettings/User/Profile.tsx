@@ -83,7 +83,7 @@ const profile = () => {
             const headers= { Authorization: `Bearer ${bearer}` }
 
 
-        await axios.get(`${baseUrl}/bmitvat/api/get_user/${userid}`,{headers})
+        await axios.get(`${baseUrl}/pcplusvat/api/get_user/${userid}`,{headers})
             .then((response) => {
                 // setInitialRecords(response.data);
                 const data = response.data;
@@ -144,7 +144,7 @@ const profile = () => {
                 const bearer1 = JSON.parse(token);
         
                 const headers= { Authorization: `Bearer ${bearer1}`,'Content-Type': 'multipart/form-data'  }
-                await axios.put(`${baseUrl}/bmitvat/api/update_user/${user_id}`, formData, {headers})
+                await axios.put(`${baseUrl}/pcplusvat/api/update_user/${user_id}`, formData, {headers})
                 .then(function (response) {
                     // console.log(response);
                     navigate("/index");

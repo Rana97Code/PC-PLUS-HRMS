@@ -4,6 +4,7 @@ import React, { lazy } from 'react';
 const Index = lazy(() => import('../pages/Index'));
 const Profile = lazy(() => import('../pages/GeneralSettings/User/Profile'));
 const LoginCover = lazy(() => import('../pages/Authentication/LoginCover'));
+const RegisterCover = lazy(() => import('../pages/Authentication/RegisterCover'));
 const Customers = lazy(() => import('../pages/Relationship/Customers/Index'));
 const AddCustomers = lazy(() => import('../pages/Relationship/Customers/AddCustomers'));
 const EditCustomers = lazy(() => import('../pages/Relationship/Customers/EditCustomers'));
@@ -11,8 +12,11 @@ const Suppliers = lazy(() => import('../pages/Relationship/Suppliers/index'));
 const AddSuppliers = lazy(() => import('../pages/Relationship/Suppliers/AddSuppliers'));
 const EditSuppliers = lazy(() => import('../pages/Relationship/Suppliers/EditSuppliers'));
 
+const AccountsSummary = lazy(() => import('../pages/Accounts/Balance/AccountsSummary'));
+
 const Transaction = lazy(() => import('../pages/Accounts/Transaction/index'));
 const TransactionAdd = lazy(() => import('../pages/Accounts/Transaction/components/AddTransaction'));
+const TransactionInvoice = lazy(() => import('../pages/Invoice/AccountsInvoice/TransactionInvoice'));
 
 const Items = lazy(() => import('../pages/Inventory/Items/index'));
 const ItemsAdd = lazy(() => import('../pages/Inventory/Items/AddItems'));
@@ -164,6 +168,16 @@ const routes = [
         layout: 'blank',
     },
     {
+        path: '/login',
+        element: <LoginCover />,
+        layout: 'blank',
+    },
+    {
+        path: '/register',
+        element: <RegisterCover />,
+        layout: 'blank',
+    },
+    {
         path: '/index',
         element: <Index />,
     },
@@ -220,12 +234,20 @@ const routes = [
         element: <UserView />,
     },
     {
+        path: '/pages/accounts/summary',
+        element: <AccountsSummary />,
+    },
+    {
         path: '/pages/accounts/transaction',
         element: <Transaction />,
     },
     {
         path: '/pages/accounts/transaction/add',
         element: <TransactionAdd />,
+    },
+    {
+        path: '/pages/accounts/transaction/invoice/:id',
+        element: <TransactionInvoice />,
     },
     {
         path: '/pages/inventory/items',

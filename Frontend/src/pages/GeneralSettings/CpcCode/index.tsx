@@ -134,7 +134,7 @@ import AddCPC from './components/addCpc';
      const headers= { Authorization: `Bearer ${bearer}`,'content-type': 'multipart/form-data' }
      // console.log(headers);
 
-   //await axios.post('http://localhost:8080/bmitvat/api/cpc/upload_cpc_excel', file, {headers})
+   //await axios.post('http://localhost:8080/pcplusvat/api/cpc/upload_cpc_excel', file, {headers})
 
    await axios.post(`${baseUrl}/cpc/upload_cpc_excel`, file, {headers})
    .then(function (response){

@@ -22,6 +22,7 @@ import IconMenuMore from '../Icon/Menu/IconMenuMore';
 import { jwtDecode } from "jwt-decode";
 
 import UserContex from '../../context/UserContex';
+import axios from 'axios';
 
 const Header = () => {
     const [username,setName]=useState("");
@@ -30,8 +31,12 @@ const Header = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const user = useContext(UserContex);
-    // console.log(user.token);
-    // console.log(user.email);
+    const baseUrl = user.base_url;
+    const headers = user.headers;
+
+
+    var profile = "";
+
 
     useEffect(() => {
         const selector = document.querySelector('ul.horizontal-menu a[href="' + window.location.pathname + '"]');
@@ -52,23 +57,22 @@ const Header = () => {
                 }
             }
         }
+        getUserDetails();
 
-        const token = localStorage.getItem('Token');
-        if(token){
-          const jwt = jwtDecode(token);
-               var user = jwt.sub;
-               var email = (jwt as any).u_email;
-               var profile = (jwt as any).pro_pic;
-               var nidpic = (jwt as any).nid_pic;
-
-              if (user !== undefined) {
-                 setName(user);
-              }
-              setProfile(profile);
-        }
 
 
     }, [location]);
+
+        const getUserDetails = async () => {
+        try {
+            const response = await axios.get(`${baseUrl}/get_me/${user?.email}`, { headers });
+            const data = response.data;
+            setName(data.user_email);
+            setProfile(data.user_img);
+        } catch (error) {
+            console.error('Error fetching user details:', error);
+        }
+    };
 
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
 

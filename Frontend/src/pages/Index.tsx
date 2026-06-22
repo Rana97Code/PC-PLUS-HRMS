@@ -492,6 +492,30 @@ const Index = () => {
         },
     };
 
+
+
+    const sumArray = (data: number[]) => {
+    return data.reduce((sum: number, value: number) => sum + Number(value || 0), 0);
+        };
+
+        const officeInvestmentTotal = sumArray(chartData.office_investment || defaultMonthlyData);
+        const incomeTotal = sumArray(chartData.income || defaultMonthlyData);
+        const expensesTotal = sumArray(chartData.expenses || defaultMonthlyData);
+        const profitTotal = sumArray(chartData.profit || defaultMonthlyData);
+
+        const grandTotal = officeInvestmentTotal + incomeTotal + expensesTotal + profitTotal;
+
+        const getSummaryPercent = (value: number) => {
+            if (grandTotal === 0) return '0%';
+            return `${Math.round((value / grandTotal) * 100)}%`;
+        };
+
+        // const formatTk = (value: number) => {
+        //     return `Tk${Number(value || 0).toLocaleString()}`;
+        // };
+
+    
+
     return (
         <div>
             <ul className="flex space-x-2 rtl:space-x-reverse">
@@ -517,12 +541,12 @@ const Index = () => {
                                     button={<IconHorizontalDots className="text-black/70 dark:text-white/70 hover:!text-primary" />}
                                 >
                                     <ul>
-                                        <li>
+                                        {/* <li>
                                             <button type="button">Weekly</button>
                                         </li>
                                         <li>
                                             <button type="button">Monthly</button>
-                                        </li>
+                                        </li> */}
                                         <li>
                                             <button type="button">Yearly</button>
                                         </li>
@@ -662,26 +686,6 @@ const Index = () => {
                 </div>
 
 
-                    {/* <div className="panel h-full">
-                        <div className="flex items-center mb-5">
-                            <h5 className="font-semibold text-lg dark:text-white-light">Expenses By Category</h5>
-                        </div>
-                        <div>
-                            <div className="bg-white dark:bg-black rounded-lg overflow-hidden">
-                                {loading ? (
-                                    <div className="min-h-[325px] grid place-content-center bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] ">
-                                        <span className="animate-spin border-2 border-black dark:border-white !border-l-transparent  rounded-full w-5 h-5 inline-flex"></span>
-                                    </div>
-                                ) : (
-                                    <ReactApexChart series={costByCategory.series} options={costByCategory.options} type="donut" height={460} />
-                                )}
-                            </div>
-                        </div>
-                    </div> */}
-
-
-
-
 
                 <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
 
@@ -736,6 +740,7 @@ const Index = () => {
                     <div className="panel h-full">
                         <div className="flex items-center justify-between dark:text-white-light mb-5">
                             <h5 className="font-semibold text-lg">Summary</h5>
+
                             <div className="dropdown">
                                 <Dropdown
                                     placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}
@@ -745,68 +750,97 @@ const Index = () => {
                                         <li>
                                             <button type="button">View Report</button>
                                         </li>
-                                        <li>
-                                            <button type="button">Edit Report</button>
-                                        </li>
-                                        <li>
-                                            <button type="button">Mark as Done</button>
-                                        </li>
                                     </ul>
                                 </Dropdown>
                             </div>
                         </div>
+
                         <div className="space-y-9">
                             <div className="flex items-center">
                                 <div className="w-9 h-9 ltr:mr-3 rtl:ml-3">
-                                    <div className="bg-secondary-light dark:bg-secondary text-secondary dark:text-secondary-light  rounded-full w-9 h-9 grid place-content-center">
+                                    <div className="bg-secondary-light dark:bg-secondary text-secondary dark:text-secondary-light rounded-full w-9 h-9 grid place-content-center">
                                         <IconInbox />
                                     </div>
                                 </div>
+
                                 <div className="flex-1">
                                     <div className="flex font-semibold text-white-dark mb-2">
-                                        <h6>Income</h6>
-                                        <p className="ltr:ml-auto rtl:mr-auto">Tk92,600</p>
+                                        <h6>Office Investment</h6>
+                                        <p className="ltr:ml-auto rtl:mr-auto">{formatTk(officeInvestmentTotal)}</p>
                                     </div>
                                     <div className="rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
-                                        <div className="bg-gradient-to-r from-[#7579ff] to-[#b224ef] w-11/12 h-full rounded-full"></div>
+                                        <div
+                                            className="bg-gradient-to-r from-[#805DCA] to-[#b224ef] h-full rounded-full"
+                                            style={{ width: getSummaryPercent(officeInvestmentTotal) }}
+                                        ></div>
                                     </div>
                                 </div>
                             </div>
+
                             <div className="flex items-center">
                                 <div className="w-9 h-9 ltr:mr-3 rtl:ml-3">
                                     <div className="bg-success-light dark:bg-success text-success dark:text-success-light rounded-full w-9 h-9 grid place-content-center">
                                         <IconTag />
                                     </div>
                                 </div>
+
                                 <div className="flex-1">
                                     <div className="flex font-semibold text-white-dark mb-2">
-                                        <h6>Profit</h6>
-                                        <p className="ltr:ml-auto rtl:mr-auto">Tk37,515</p>
+                                        <h6>Income</h6>
+                                        <p className="ltr:ml-auto rtl:mr-auto">{formatTk(incomeTotal)}</p>
                                     </div>
                                     <div className="w-full rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
-                                        <div className="bg-gradient-to-r from-[#3cba92] to-[#0ba360] w-full h-full rounded-full" style={{ width: '65%' }}></div>
+                                        <div
+                                            className="bg-gradient-to-r from-[#00AB55] to-[#0ba360] h-full rounded-full"
+                                            style={{ width: getSummaryPercent(incomeTotal) }}
+                                        ></div>
                                     </div>
                                 </div>
                             </div>
+
                             <div className="flex items-center">
                                 <div className="w-9 h-9 ltr:mr-3 rtl:ml-3">
                                     <div className="bg-warning-light dark:bg-warning text-warning dark:text-warning-light rounded-full w-9 h-9 grid place-content-center">
                                         <IconCreditCard />
                                     </div>
                                 </div>
+
                                 <div className="flex-1">
                                     <div className="flex font-semibold text-white-dark mb-2">
                                         <h6>Expenses</h6>
-                                        <p className="ltr:ml-auto rtl:mr-auto">Tk55,085</p>
+                                        <p className="ltr:ml-auto rtl:mr-auto">{formatTk(expensesTotal)}</p>
                                     </div>
                                     <div className="w-full rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
-                                        <div className="bg-gradient-to-r from-[#f09819] to-[#ff5858] w-full h-full rounded-full" style={{ width: '80%' }}></div>
+                                        <div
+                                            className="bg-gradient-to-r from-[#E7515A] to-[#ff5858] h-full rounded-full"
+                                            style={{ width: getSummaryPercent(expensesTotal) }}
+                                        ></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center">
+                                <div className="w-9 h-9 ltr:mr-3 rtl:ml-3">
+                                    <div className="bg-primary-light dark:bg-primary text-primary dark:text-primary-light rounded-full w-9 h-9 grid place-content-center">
+                                        <IconTag />
+                                    </div>
+                                </div>
+
+                                <div className="flex-1">
+                                    <div className="flex font-semibold text-white-dark mb-2">
+                                        <h6>Profit</h6>
+                                        <p className="ltr:ml-auto rtl:mr-auto">{formatTk(profitTotal)}</p>
+                                    </div>
+                                    <div className="w-full rounded-full h-2 bg-dark-light dark:bg-[#1b2e4b] shadow">
+                                        <div
+                                            className="bg-gradient-to-r from-[#2196F3] to-[#1B55E2] h-full rounded-full"
+                                            style={{ width: getSummaryPercent(profitTotal) }}
+                                        ></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-
-                 </div>
-                </div>
 
 
 
@@ -836,7 +870,6 @@ const Index = () => {
 
 
 
-                <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
                     <div className="panel h-full sm:col-span-2 xl:col-span-1 pb-0">
                         <h5 className="font-semibold text-lg dark:text-white-light mb-5">Recent Activities</h5>
                         <PerfectScrollbar className="relative h-[290px] ltr:pr-3 rtl:pl-3 ltr:-mr-3 rtl:-ml-3 mb-4">
@@ -964,11 +997,11 @@ const Index = () => {
                             </Link>
                         </div>
                     </div>
-                </div>
 
 
 
-                    {/* <div className="panel h-full">
+
+                    <div className="panel h-full">
                         <div className="flex items-center justify-between dark:text-white-light mb-5">
                             <h5 className="font-semibold text-lg">Transactions</h5>
                             <div className="dropdown">
@@ -1046,292 +1079,7 @@ const Index = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div className="panel h-full p-0 border-0 overflow-hidden">
-                        <div className="p-6 bg-gradient-to-r from-[#4361ee] to-[#160f6b] min-h-[190px]">
-                            <div className="flex justify-between items-center mb-6">
-                                <div className="bg-black/50 rounded-full p-1 ltr:pr-3 rtl:pl-3 flex items-center text-white font-semibold">
-                                    <img className="w-8 h-8 rounded-full border-2 border-white/50 block object-cover ltr:mr-1 rtl:ml-1" src="/assets/images/proile-34.jpeg" alt="avatar" />
-                                    Site Manager Account
-                                </div>
-                                <button type="button" className="ltr:ml-auto rtl:mr-auto flex items-center justify-between w-9 h-9 bg-black text-white rounded-md hover:opacity-80">
-                                    <IconPlus className="w-6 h-6 m-auto" />
-                                </button>
-                            </div>
-                            <div className="text-white flex justify-between items-center">
-                                <p className="text-xl">Wallet Balance</p>
-                                <h5 className="ltr:ml-auto rtl:mr-auto text-2xl">
-                                    <span className="text-white-light">Tk</span>2953
-                                </h5>
-                            </div>
-                        </div>
-                        <div className="-mt-12 px-8 grid grid-cols-2 gap-2">
-                            <div className="bg-white rounded-md shadow px-4 py-2.5 dark:bg-[#060818]">
-                                <span className="flex justify-between items-center mb-4 dark:text-white">
-                                    Received
-                                    <IconCaretDown className="w-4 h-4 text-success rotate-180" />
-                                </span>
-                                <div className="btn w-full  py-1 text-base shadow-none border-0 bg-[#ebedf2] dark:bg-black text-[#515365] dark:text-[#bfc9d4]">Tk97.99</div>
-                            </div>
-                            <div className="bg-white rounded-md shadow px-4 py-2.5 dark:bg-[#060818]">
-                                <span className="flex justify-between items-center mb-4 dark:text-white">
-                                    Spent
-                                    <IconCaretDown className="w-4 h-4 text-danger" />
-                                </span>
-                                <div className="btn w-full  py-1 text-base shadow-none border-0 bg-[#ebedf2] dark:bg-black text-[#515365] dark:text-[#bfc9d4]">Tk53.00</div>
-                            </div>
-                        </div>
-                        <div className="p-5">
-                            <div className="mb-5">
-                                <span className="bg-[#1b2e4b] text-white text-xs rounded-full px-4 py-1.5 before:bg-white before:w-1.5 before:h-1.5 before:rounded-full ltr:before:mr-2 rtl:before:ml-2 before:inline-block">
-                                    Pending
-                                </span>
-                            </div>
-                            <div className="mb-5 space-y-1">
-                                <div className="flex items-center justify-between">
-                                    <p className="text-[#515365] font-semibold">Remain</p>
-                                    <p className="text-base">
-                                        <span>Tk</span> <span className="font-semibold">13.85</span>
-                                    </p>
-                                </div>
-                                <div className="flex items-center justify-between">
-                                    <p className="text-[#515365] font-semibold">BlueHost VPN</p>
-                                    <p className="text-base">
-                                        <span>Tk</span> <span className="font-semibold ">15.66</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div className="text-center px-2 flex justify-around">
-                                <button type="button" className="btn btn-secondary ltr:mr-2 rtl:ml-2">
-                                    View Details
-                                </button>
-                                <button type="button" className="btn btn-success">
-                                    Pay Now Tk29.51
-                                </button>
-                            </div>
-                        </div>
-                    </div>
                 </div>
-
-                <div className="grid lg:grid-cols-2 grid-cols-1 gap-6">
-                    <div className="panel h-full w-full">
-                        <div className="flex items-center justify-between mb-5">
-                            <h5 className="font-semibold text-lg dark:text-white-light">Recent Orders</h5>
-                        </div>
-                        <div className="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th className="ltr:rounded-l-md rtl:rounded-r-md">Customer</th>
-                                        <th>Product</th>
-                                        <th>Invoice</th>
-                                        <th>Price</th>
-                                        <th className="ltr:rounded-r-md rtl:rounded-l-md">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr className="text-white-dark hover:text-black dark:hover:text-white-light/90 group">
-                                        <td className="min-w-[150px] text-black dark:text-white">
-                                            <div className="flex items-center">
-                                                <img className="w-8 h-8 rounded-md ltr:mr-3 rtl:ml-3 object-cover" src="/assets/images/profle-6.jpeg" alt="avatar" />
-                                                <span className="whitespace-nowrap">Akij Group</span>
-                                            </div>
-                                        </td>
-                                        <td className="text-primary">Cables</td>
-                                        <td>
-                                            <Link to="/apps/invoice/preview">#46894</Link>
-                                        </td>
-                                        <td>Tk56.07</td>
-                                        <td>
-                                            <span className="badge bg-success shadow-md dark:group-hover:bg-transparent">Paid</span>
-                                        </td>
-                                    </tr>
-                                    <tr className="text-white-dark hover:text-black dark:hover:text-white-light/90 group">
-                                        <td className="text-black dark:text-white">
-                                            <div className="flex items-center">
-                                                <img className="w-8 h-8 rounded-md ltr:mr-3 rtl:ml-3 object-cover" src="/assets/images/prfie-7.jpeg" alt="avatar" />
-                                                <span className="whitespace-nowrap">Navana</span>
-                                            </div>
-                                        </td>
-                                        <td className="text-info">Cables</td>
-                                        <td>
-                                            <Link to="/apps/invoice/preview">#76894</Link>
-                                        </td>
-                                        <td>Tk126.04</td>
-                                        <td>
-                                            <span className="badge bg-secondary shadow-md dark:group-hover:bg-transparent">Shipped</span>
-                                        </td>
-                                    </tr>
-                                    <tr className="text-white-dark hover:text-black dark:hover:text-white-light/90 group">
-                                        <td className="text-black dark:text-white">
-                                            <div className="flex items-center">
-                                                <img className="w-8 h-8 rounded-md ltr:mr-3 rtl:ml-3 object-cover" src="/assets/images/profle-8.jpeg" alt="avatar" />
-                                                <span className="whitespace-nowrap">Bata BD</span>
-                                            </div>
-                                        </td>
-                                        <td className="text-warning">Cables</td>
-                                        <td>
-                                            <Link to="/apps/invoice/preview">#66894</Link>
-                                        </td>
-                                        <td>Tk56.07</td>
-                                        <td>
-                                            <span className="badge bg-success shadow-md dark:group-hover:bg-transparent">Paid</span>
-                                        </td>
-                                    </tr>
-                                    <tr className="text-white-dark hover:text-black dark:hover:text-white-light/90 group">
-                                        <td className="text-black dark:text-white">
-                                            <div className="flex items-center">
-                                                <img className="w-8 h-8 rounded-md ltr:mr-3 rtl:ml-3 object-cover" src="/assets/images/profle-9.jpeg" alt="avatar" />
-                                                <span className="whitespace-nowrap">Ryan Collins</span>
-                                            </div>
-                                        </td>
-                                        <td className="text-danger">Copper Wair</td>
-                                        <td>
-                                            <Link to="/apps/invoice/preview">#75844</Link>
-                                        </td>
-                                        <td>Tk110.00</td>
-                                        <td>
-                                            <span className="badge bg-secondary shadow-md dark:group-hover:bg-transparent">Shipped</span>
-                                        </td>
-                                    </tr>
-                                    <tr className="text-white-dark hover:text-black dark:hover:text-white-light/90 group">
-                                        <td className="text-black dark:text-white">
-                                            <div className="flex items-center">
-                                                <img className="w-8 h-8 rounded-md ltr:mr-3 rtl:ml-3 object-cover" src="/assets/images/prole-10.jpeg" alt="avatar" />
-                                                <span className="whitespace-nowrap">Irene Collins</span>
-                                            </div>
-                                        </td>
-                                        <td className="text-secondary">Speakers</td>
-                                        <td>
-                                            <Link to="/apps/invoice/preview">#46894</Link>
-                                        </td>
-                                        <td>Tk56.07</td>
-                                        <td>
-                                            <span className="badge bg-success shadow-md dark:group-hover:bg-transparent">Paid</span>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div className="panel h-full w-full">
-                        <div className="flex items-center justify-between mb-5">
-                            <h5 className="font-semibold text-lg dark:text-white-light">Top Selling Product</h5>
-                        </div>
-                        <div className="table-responsive">
-                            <table>
-                                <thead>
-                                    <tr className="border-b-0">
-                                        <th className="ltr:rounded-l-md rtl:rounded-r-md">Product</th>
-                                        <th>Price</th>
-                                        <th>Discount</th>
-                                        <th>Sold</th>
-                                        <th className="ltr:rounded-r-md rtl:rounded-l-md">Source</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr className="text-white-dark hover:text-black dark:hover:text-white-light/90 group">
-                                        <td className="min-w-[150px] text-black dark:text-white">
-                                            <div className="flex">
-                                                <img className="w-8 h-8 rounded-md ltr:mr-3 rtl:ml-3 object-cover" src="/assets/images/produt-Cabless.jpg" alt="avatar" />
-                                                <p className="whitespace-nowrap">
-                                                    Cables
-                                                    <span className="text-primary block text-xs">Digital</span>
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td>Tk168.09</td>
-                                        <td>Tk60.09</td>
-                                        <td>170</td>
-                                        <td>
-                                            <Link className="text-danger flex items-center" to="/">
-                                                <IconMultipleForwardRight className="rtl:rotate-180 ltr:mr-1 rtl:ml-1" />
-                                                Direct
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                    <tr className="text-white-dark hover:text-black dark:hover:text-white-light/90 group">
-                                        <td className="text-black dark:text-white">
-                                            <div className="flex">
-                                                <img className="w-8 h-8 rounded-md ltr:mr-3 rtl:ml-3 object-cover" src="/assets/images/produc-shoes.jpg" alt="avatar" />
-                                                <p className="whitespace-nowrap">
-                                                    Transformer <span className="text-warning block text-xs">Accessories</span>
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td>Tk126.04</td>
-                                        <td>Tk47.09</td>
-                                        <td>130</td>
-                                        <td>
-                                            <Link className="text-success flex items-center" to="/">
-                                                <IconMultipleForwardRight className="rtl:rotate-180 ltr:mr-1 rtl:ml-1" />
-                                                Link
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                    <tr className="text-white-dark hover:text-black dark:hover:text-white-light/90 group">
-                                        <td className="text-black dark:text-white">
-                                            <div className="flex">
-                                                <img className="w-8 h-8 rounded-md ltr:mr-3 rtl:ml-3 object-cover" src="/assets/images/pruct-watch.jpg" alt="avatar" />
-                                                <p className="whitespace-nowrap">
-                                                    Bulb <span className="text-danger block text-xs">Accessories</span>
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td>Tk56.07</td>
-                                        <td>Tk20.00</td>
-                                        <td>66</td>
-                                        <td>
-                                            <Link className="text-warning flex items-center" to="/">
-                                                <IconMultipleForwardRight className="rtl:rotate-180 ltr:mr-1 rtl:ml-1" />
-                                                Ads
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                    <tr className="text-white-dark hover:text-black dark:hover:text-white-light/90 group">
-                                        <td className="text-black dark:text-white">
-                                            <div className="flex">
-                                                <img className="w-8 h-8 rounded-md ltr:mr-3 rtl:ml-3 object-cover" src="/assets/images/prouct-laptop.jpg" alt="avatar" />
-                                                <p className="whitespace-nowrap">
-                                                    Lamp Post <span className="text-primary block text-xs">Digital</span>
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td>Tk110.00</td>
-                                        <td>Tk33.00</td>
-                                        <td>35</td>
-                                        <td>
-                                            <Link className="text-secondary flex items-center" to="/">
-                                                <IconMultipleForwardRight className="rtl:rotate-180 ltr:mr-1 rtl:ml-1" />
-                                                Email
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                    <tr className="text-white-dark hover:text-black dark:hover:text-white-light/90 group">
-                                        <td className="text-black dark:text-white">
-                                            <div className="flex">
-                                                <img className="w-8 h-8 rounded-md ltr:mr-3 rtl:ml-3 object-cover" src="/assets/images/product-camra.jpg" alt="avatar" />
-                                                <p className="whitespace-nowrap">
-                                                    Transformer Oil <span className="text-primary block text-xs">Raw Materials</span>
-                                                </p>
-                                            </div>
-                                        </td>
-                                        <td>Tk56.07</td>
-                                        <td>Tk26.04</td>
-                                        <td>30</td>
-                                        <td>
-                                            <Link className="text-primary flex items-center" to="/">
-                                                <IconMultipleForwardRight className="rtl:rotate-180 ltr:mr-1 rtl:ml-1" />
-                                                Referral
-                                            </Link>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div> */}
             </div>
         </div>
     </div>

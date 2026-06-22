@@ -1,274 +1,240 @@
-import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { IRootState } from '../../../store';
-import { setPageTitle } from '../../../store/themeConfigSlice';
-import { useContext,useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState, useContext } from 'react';
 import IconMail from '../../../components/Icon/IconMail';
 import IconPhone from '../../../components/Icon/IconPhone';
 import IconFile from '../../../components/Icon/IconFile';
 import IconTrashLines from '../../../components/Icon/IconTrashLines';
-import change from "../../../../public/assets/images/change-password.svg"
-import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
 import UserContex from '../../../context/UserContex';
 
-
-const profile = () => {
+const Profile = () => {
     const user = useContext(UserContex);
-    const baseUrl= user.base_url;
-
-    // const dispatch = useDispatch();
-    const [user_id,setUserId]=useState("");
-    const [username,setName]=useState("");
-    const [userProfile,setTokenProfile]=useState("");
-    const [useremail,setTokenEmail]=useState("");
-    const [userphone,setTokenPhone]=useState("");
-
-    //for form data
-    const [userName, setUsername] = useState("");
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [uEmail, setEmail] = useState("");
-    const [userPhone, setPhone] = useState("");
-    const [userNid, setNid] = useState("");
-    const [nidScan, setNidImg] = useState<File | null>(null);
-    const [password, setPassword] = useState("");
-    const [profileImage, setProfile] = useState<File | null>(null);
-    const [saleCenterId, setSalesCenter] = useState("");
-    const [userType, setUserType] = useState("");
-    const [status, setStatus] = useState("");
-
-    const params = useParams();
+    const baseUrl = user.base_url;
+    const headers = user.headers;
     const navigate = useNavigate();
 
+    const [userId, setUserId] = useState<number | null>(null);
+    const [userName, setUserName] = useState('');
+    const [userEmail, setUserEmail] = useState('');
+    const [userPhone, setUserPhone] = useState('');
+    const [userPassword, setUserPassword] = useState('');
+    const [userImg, setUserImg] = useState('');
+    const [profileFile, setProfileFile] = useState<File | null>(null);
+    const [previewImage, setPreviewImage] = useState('');
 
+    const defaultImage = '/assets/images/users/user-profile.jpeg';
 
     useEffect(() => {
-        // dispatch(setPageTitle('Profile'));
+        if (!user?.token) {
+            navigate('/');
+            return;
+        }
 
-             //Data from session token
-             const token = localStorage.getItem('Token');
-             if(token){
-     
-               const jwt = jwtDecode(token);
-                    var user = jwt.sub;
-                    var email = (jwt as any).u_email;
-                    var profile = (jwt as any).pro_pic;
-                    var uphone = (jwt as any).u_phone;
-                    // var user_id = (jwt as any).u_id;
-                 //    console.log(user);
-     
-                 if (user !== undefined) {
-                    setName(user);
-                 }
-                    // setUserId(user_id);
-                    setTokenEmail(email);
-                    setTokenProfile(profile);
-                    setTokenPhone(uphone);
-     
-             }
-             getUserDetails();
-    },[]);
+        getUserDetails();
+    }, []);
 
+    const getUserDetails = async () => {
+        try {
+            const response = await axios.get(`${baseUrl}/get_me/${user?.email}`, { headers });
+            const data = response.data;
 
+            setUserId(data.id);
+            setUserName(data.user_name || '');
+            setUserEmail(data.user_email || '');
+            setUserPhone(data.user_phone || '');
+            setUserPassword(data.user_password || '');
+            setUserImg(data.user_img || '');
 
+            if (data.user_img) {
+                setPreviewImage(`/assets/images/users/${data.user_img}`);
+            } else {
+                setPreviewImage(defaultImage);
+            }
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+        }
+    };
 
-  const getUserDetails = async()=>{
-        const token = localStorage.getItem('Token');
-        if(token){
-            const jwt = jwtDecode(token);
-            var userid = (jwt as any).u_id;
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
 
-            const bearer = JSON.parse(token);
-            const headers= { Authorization: `Bearer ${bearer}` }
-
-
-        await axios.get(`${baseUrl}/pcplusvat/api/get_user/${userid}`,{headers})
-            .then((response) => {
-                // setInitialRecords(response.data);
-                const data = response.data;
-                // console.log(data);
-                setFirstName(data.firstName)
-                setLastName(data.lastName)
-                setEmail(data.userEmail)
-                setPhone(data.userPhone)
-                setNid(data.userNid)
-                setProfile(data.profileImage)
-                setNidImg(data.nidScan)
-                setUserId(data.id);
-
-            })
-            .catch((error) => {
-                console.error('Error fetching data:', error);
-
-            });
-         }
-
-    }
-
-
-
-      
-     
-
-
+        if (file) {
+            setProfileFile(file);
+            setPreviewImage(URL.createObjectURL(file));
+        }
+    };
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-    
-            // if(nidScan && profileImage){
-            if(profileImage){
-            const formData = new FormData();
-            // formData.append('username', userName);
-            formData.append('firstName', firstName);
-            formData.append('lastName', lastName);
-            formData.append('userEmail', uEmail);
-            formData.append('userPhone', userPhone);
-            formData.append('userNid', userNid);
-            // formData.append('nidScan', nidScan);
-            // formData.append('password', password);
-            formData.append('profileImage', profileImage);
-            // formData.append('saleCenterId', saleCenterId);
-            // formData.append('userType', userType);
-            // formData.append('status', status);
-            formData.append('createdBy', `0`);
-            formData.append('updatedBy', `0`);
-            
-            
-            
-            try {
-                console.warn(formData);
-                const token = localStorage.getItem('Token');
-                if(token){
-                const bearer1 = JSON.parse(token);
-        
-                const headers= { Authorization: `Bearer ${bearer1}`,'Content-Type': 'multipart/form-data'  }
-                await axios.put(`${baseUrl}/pcplusvat/api/update_user/${user_id}`, formData, {headers})
-                .then(function (response) {
-                    // console.log(response);
-                    navigate("/index");
-                    console.warn("Insert Successfull");
-                })
-            
-                .catch(function(error) {
-                console.warn("Insert Unsuccessfull");
-                navigate("/pages/user/profile");
-                })
-            }
-            } catch (err) {
-                console.log(err);
-            }
+        if (!userId) {
+            alert('User ID not found');
+            return;
+        }
 
-            }
-    
-    }
+        const userData = {
+            id: userId,
+            user_img: userImg || '',
+            user_name: userName,
+            user_phone: userPhone,
+            user_email: userEmail,
+            user_password: userPassword,
+        };
 
+        const formData = new FormData();
 
+        formData.append('user_name', userName);
+        formData.append('user_email', userEmail);
+        formData.append('user_phone', userPhone);
+        formData.append('user_password', userPassword);
 
+        if (profileFile) {
+            formData.append('file', profileFile);
+        }
 
-    const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
+        // formData.append('user', JSON.stringify(userData));
+
+        if (profileFile) {
+            formData.append('file', profileFile);
+        }
+
+        try {
+            await axios.put(`${baseUrl}/update_user/${userId}`, formData, {
+                headers: {
+                    ...headers,
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            alert('Profile updated successfully');
+            navigate('/index');
+        } catch (error: any) {
+            console.error('Profile update error:', error);
+            alert(error?.response?.data?.detail || 'Profile update failed');
+        }
+    };
+
     return (
         <div>
-            <div className="panel flex items-center justify-between flex-wrap gap-4 mb-3">
-                <h2 className="text-lg">Profile Information</h2>
+            <div className="panel flex items-center justify-between flex-wrap gap-4 mb-5">
+                <div>
+                    <h2 className="text-xl font-bold">Profile Information</h2>
+                    <p className="text-sm text-white-dark">Manage your personal account information</p>
+                </div>
             </div>
-            <div className="pt-5">
-                <div className="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-4 gap-5 mb-5">
-                    <div className="panel">
-                        <div className="flex items-center justify-between mb-5">
-                            <h5 className="font-semibold text-lg dark:text-white-light">Profile</h5>
+
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
+                <div className="panel lg:col-span-1">
+                    <div className="flex flex-col items-center text-center">
+                        <div className="relative">
+                            <img
+                                src={previewImage || defaultImage}
+                                alt="Profile"
+                                className="w-32 h-32 rounded-full object-cover border-4 border-primary shadow"
+                            />
                         </div>
-                        <div className="mb-6">
-                            <div className="flex flex-col justify-center items-center">
-                                <img src={'/assets/images/users/'+ userProfile} alt="img" className="w-24 h-24 rounded-full object-cover  mb-5" />
-                                <p className="font-semibold text-primary text-xl">{username}</p>
+
+                        <h3 className="font-bold text-xl text-primary mt-4">{userName}</h3>
+                        <p className="text-sm text-white-dark">User ID: {userId}</p>
+
+                        <div className="w-full mt-6 space-y-4">
+                            <div className="flex items-center gap-3 bg-gray-50 dark:bg-[#1b2e4b] rounded p-3">
+                                <IconMail className="w-5 h-5 text-primary" />
+                                <span className="text-sm break-all">{userEmail}</span>
                             </div>
-                            <ul className="mt-5 flex flex-col max-w-[160px] m-auto space-y-4 font-semibold text-white-dark">
-                                <li>
-                                    <button className="flex items-center gap-2">
-                                        <IconMail className="w-5 h-5 shrink-0" />
-                                        <span className="text-primary truncate">{useremail}</span>
-                                    </button>
-                                </li>
-                                <li className="flex items-center gap-2">
-                                    <IconPhone />
-                                    <span className="whitespace-nowrap" dir="ltr">
-                                        {userphone}
-                                    </span>
-                                </li>
-                                <button type="button" className="btn btn-success ">
-                                    <img src={change} alt="" className='w-8 h-8' />
-                                    <span className="whitespace-nowrap" dir="ltr">
-                                        Change password
-                                    </span>
-                                </button>
-                            </ul>
+
+                            <div className="flex items-center gap-3 bg-gray-50 dark:bg-[#1b2e4b] rounded p-3">
+                                <IconPhone />
+                                <span className="text-sm">{userPhone}</span>
+                            </div>
                         </div>
+
+                        <button type="button" className="btn btn-success mt-6 gap-2">
+                            <img src="/assets/images/change-password.svg" alt="" className="w-6 h-6" />
+                            Change Password
+                        </button>
                     </div>
-                    <div className=" lg:col-span-8 xl:col-span-3">
-                        <div className="panel flex items-center justify-between flex-wrap gap-4 mb-3">
-                            <h2 className="text-lg">Information</h2>
+                </div>
+
+                <div className="lg:col-span-3">
+                    <div className="panel">
+                        <div className="mb-7">
+                            <h5 className="font-semibold text-lg dark:text-white-light">Update Profile</h5>
+                            <p className="text-sm text-white-dark">Update your name, email, phone and profile image</p>
                         </div>
-                        {/* Horizontal */}
-                        <div className="panel " id="user_form">
-                            <div className="flex items-center justify-between mb-7">
-                                <div className="mb-4">
-                                    <form className="space-y-5" onSubmit={handleSubmit}>
-                                        <div className="flex sm:flex-row flex-col">
-                                            <label htmlFor="horizontalEmail" className="mb-0 sm:w-1/4 sm:ltr:mr-2 rtl:ml-2">
-                                                First Name
-                                            </label>
-                                            <input id="horizontalEmail" type="text" value={firstName} onChange={(e)=>setFirstName(e.target.value)} className="form-input flex-1" required />
-                                        </div>
-                                        <div className="flex sm:flex-row flex-col">
-                                            <label htmlFor="horizontalEmail" className="mb-0 sm:w-1/4 sm:ltr:mr-2 rtl:ml-2">
-                                                Last Name
-                                            </label>
-                                            <input id="horizontalEmail" type="text" value={lastName} onChange={(e)=>setLastName(e.target.value)} className="form-input flex-1" required />
-                                        </div>
-                                        <div className="flex sm:flex-row flex-col">
-                                            <label htmlFor="horizontalEmail" className="mb-0 sm:w-1/4 sm:ltr:mr-2 rtl:ml-2">
-                                                Email
-                                            </label>
-                                            <input id="horizontalEmail" type="email" value={useremail} onChange={(e)=>setEmail(e.target.value)} className="form-input flex-1" required />
-                                        </div>
-                                        <div className="flex sm:flex-row flex-col">
-                                            <label htmlFor="horizontalEmail" className="mb-0 sm:w-1/4 sm:ltr:mr-2 rtl:ml-2">
-                                                Phone
-                                            </label>
-                                            <input id="horizontalEmail" type="text" value={userPhone} onChange={(e)=>setPhone(e.target.value)} className="form-input flex-1" required />
-                                        </div>
-                                        <div className="flex sm:flex-row flex-col ">
-                                            <label htmlFor="horizontalEmail" className="mb-0 sm:w-1/4 sm:ltr:mr-2 rtl:ml-2">
-                                                Profile Pic
-                                            </label>
-                                                <input id="horizontalEmail" type="file" onChange={(e)=>setProfile(e.target.files![0])} className="form-input flex-1" required />
-                                                {/* <span className="text-white-dark">Images only (image/*)
-                                                </span> */}
-                                        </div>
-                                        <div className="flex sm:flex-row flex-col">
-                                            <label htmlFor="horizontalEmail" className="mb-0 sm:w-1/4 sm:ltr:mr-2 rtl:ml-2">
-                                                NDI Number
-                                            </label>
-                                            <input id="horizontalEmail" type="text" value={userNid} onChange={(e)=>setNid(e.target.value)} className="form-input flex-1" required />
-                                        </div>
-                                        <div className="flex items-center  justify-center gap-6">
-                                            <button type="submit" className="btn btn-primary gap-2">
-                                                <IconFile className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
-                                                Submit
-                                            </button>
-                                            <Link to={"/index"} >
-                                                <button type="button" className="btn btn-danger gap-2" >
-                                                    <IconTrashLines className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
-                                                    Cancel
-                                                </button>
-                                            </Link>
-                                        </div>
-                                    </form>
+
+                        <form className="space-y-5" onSubmit={handleSubmit}>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                                <div>
+                                    <label>User Name</label>
+                                    <input
+                                        type="text"
+                                        value={userName}
+                                        onChange={(e) => setUserName(e.target.value)}
+                                        className="form-input"
+                                        placeholder="Enter user name"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label>Email</label>
+                                    <input
+                                        type="email"
+                                        value={userEmail}
+                                        onChange={(e) => setUserEmail(e.target.value)}
+                                        className="form-input"
+                                        placeholder="Enter email"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label>Phone</label>
+                                    <input
+                                        type="text"
+                                        value={userPhone}
+                                        onChange={(e) => setUserPhone(e.target.value)}
+                                        className="form-input"
+                                        placeholder="Enter phone number"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label>Profile Image</label>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleFileChange}
+                                        className="form-input"
+                                    />
                                 </div>
                             </div>
-                        </div>
+
+                            <div className="border rounded p-4 bg-gray-50 dark:bg-[#1b2e4b]">
+                                <p className="text-sm text-white-dark">
+                                    Current image:{' '}
+                                    <span className="font-semibold text-primary">
+                                        {userImg || 'No image uploaded'}
+                                    </span>
+                                </p>
+                            </div>
+
+                            <div className="flex items-center justify-center gap-6 pt-4">
+                                <button type="submit" className="btn btn-primary gap-2">
+                                    <IconFile className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
+                                    Update Profile
+                                </button>
+
+                                <Link to="/index">
+                                    <button type="button" className="btn btn-danger gap-2">
+                                        <IconTrashLines className="w-5 h-5 ltr:mr-2 rtl:ml-2" />
+                                        Cancel
+                                    </button>
+                                </Link>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -276,4 +242,4 @@ const profile = () => {
     );
 };
 
-export default profile;
+export default Profile;

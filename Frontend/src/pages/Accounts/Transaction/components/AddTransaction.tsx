@@ -1,10 +1,9 @@
-
 import React, { useContext, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import IconFile from '../../../../components/Icon/IconFile';
 import IconTrashLines from '../../../../components/Icon/IconTrashLines';
-import IconArrowBackward from "../../../../components/Icon/IconArrowBackward"
+import IconArrowBackward from '../../../../components/Icon/IconArrowBackward';
 import UserContext from '../../../../context/UserContex';
 
 const AddTransaction: React.FC = () => {
@@ -13,7 +12,6 @@ const AddTransaction: React.FC = () => {
 
     const headers = user.headers;
     const baseUrl = user.base_url;
-  
 
     const getTodayDate = () => {
         const today = new Date();
@@ -25,19 +23,38 @@ const AddTransaction: React.FC = () => {
         transaction_type: '',
         transaction_by: '',
         transaction_to: '',
-        amount_in: 0,
-        amount_out: 0,
-        cost: 0,
-        due_amount: 0,
-        return_amount: 0,
+        amount_in: '',
+        amount_out: '',
+        cost: '',
+        due_amount: '',
+        return_amount: '',
         transaction_notes: '',
-        created_by: user?.email || "office@email.com",
+        created_by: user?.email || 'office@email.com',
     };
 
-    const [form, setForm] = useState(emptyForm);
-    const [transactionList, setTransactionList] = useState<any[]>([]);
+    const debitTransactionTypes = [
+        { value: 'Utilities', label: 'Utilities' },
+        { value: 'Bazzar', label: 'Bazzar' },
+        { value: 'Transport', label: 'Transport' },
+        { value: 'Food', label: 'Food' },
+        { value: 'Stationery', label: 'Stationery' },
+        { value: 'Internet Bill', label: 'Internet Bill' },
+        { value: 'Mobile Bill', label: 'Mobile Bill' },
+        { value: 'Electricity Bill', label: 'Electricity Bill' },
+        { value: 'Rent', label: 'Rent' },
+        { value: 'Maintenance', label: 'Maintenance' },
+        { value: 'Other Office Cost', label: 'Other Office Cost' },
+    ];
 
-    
+    const creditTransactionTypes = [
+        { value: 'Service_Sales', label: 'Service & Sales' },
+        { value: 'Office_Investment', label: 'Office Investment' },
+    ];
+
+    const [form, setForm] = useState<any>(emptyForm);
+    const [transactionList, setTransactionList] = useState<any[]>([]);
+    const [transactionMode, setTransactionMode] = useState('');
+
     const handleChange = (field: string, value: any) => {
         setForm({
             ...form,
@@ -45,14 +62,41 @@ const AddTransaction: React.FC = () => {
         });
     };
 
+    const handleTransactionModeChange = (value: string) => {
+        setTransactionMode(value);
+
+        setForm({
+            ...form,
+            transaction_type: '',
+            amount_in: value === 'Debit' ? 0 : form.amount_in,
+            amount_out: value === 'Credit' ? 0 : form.amount_out,
+        });
+    };
+
     const addTransactionRow = () => {
-        if (!form.transaction_type) {
-            alert('Please enter transaction type');
+        if (!transactionMode) {
+            alert('Please select Debit/Credit');
             return;
         }
 
-        setTransactionList([...transactionList, form]);
+        if (!form.transaction_type) {
+            alert('Please select transaction type');
+            return;
+        }
+
+        const transaction = {
+            ...form,
+            amount_in: transactionMode === 'Credit' ? Number(form.amount_in || 0) : 0,
+            amount_out: transactionMode === 'Debit' ? Number(form.amount_out || 0) : 0,
+            cost: Number(form.cost || 0),
+            due_amount: Number(form.due_amount || 0),
+            return_amount: Number(form.return_amount || 0),
+            created_by: user?.email || 'office@email.com',
+        };
+
+        setTransactionList([...transactionList, transaction]);
         setForm(emptyForm);
+        setTransactionMode('');
     };
 
     const removeTransactionRow = (index: number) => {
@@ -67,6 +111,7 @@ const AddTransaction: React.FC = () => {
             alert('Please add at least one transaction');
             return;
         }
+
         try {
             await axios.post(`${baseUrl}/transaction/add-multiple-transaction`, transactionList, { headers });
             navigate('/pages/accounts/transaction');
@@ -76,15 +121,14 @@ const AddTransaction: React.FC = () => {
         }
     };
 
+    const transactionTypes = transactionMode === 'Credit' ? creditTransactionTypes : debitTransactionTypes;
+
     return (
         <div>
             <div className="panel flex items-center justify-between flex-wrap gap-4 text-black">
                 <h2 className="text-white text-xl font-bold">Transaction</h2>
 
-                <Link
-                    to="/pages/accounts/transaction"
-                    className="btn btn-secondary gap-2"
-                >
+                <Link to="/pages/accounts/transaction" className="btn btn-secondary gap-2">
                     <IconArrowBackward className="w-4 h-4" />
                     Back to List
                 </Link>
@@ -109,27 +153,34 @@ const AddTransaction: React.FC = () => {
                             </div>
 
                             <div>
+                                <label>Debit/Credit</label>
+                                <select
+                                    className="form-select text-dark"
+                                    value={transactionMode}
+                                    onChange={(e) => handleTransactionModeChange(e.target.value)}
+                                    
+                                >
+                                    <option value="">Select Debit/Credit</option>
+                                    <option value="Debit">Debit</option>
+                                    <option value="Credit">Credit</option>
+                                </select>
+                            </div>
+
+                            <div>
                                 <label>Transaction Type</label>
                                 <select
                                     className="form-select text-dark"
                                     value={form.transaction_type}
                                     onChange={(e) => handleChange('transaction_type', e.target.value)}
-                                
+                                    disabled={!transactionMode}
+                                    
                                 >
                                     <option value="">Select Transaction Type</option>
-                                    <option value="Service_Sales">Service & Sales</option>
-                                    <option value="Office_Investment">Office Investment</option>
-                                    <option value="Utilities">Utilities</option>
-                                    <option value="Bazzar">Bazzar</option>
-                                    <option value="Transport">Transport</option>
-                                    <option value="Food">Food</option>
-                                    <option value="Stationery">Stationery</option>
-                                    <option value="Internet Bill">Internet Bill</option>
-                                    <option value="Mobile Bill">Mobile Bill</option>
-                                    <option value="Electricity Bill">Electricity Bill</option>
-                                    <option value="Rent">Rent</option>
-                                    <option value="Maintenance">Maintenance</option>
-                                    <option value="Other Office Cost">Other Office Cost</option>
+                                    {transactionTypes.map((type) => (
+                                        <option key={type.value} value={type.value}>
+                                            {type.label}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -155,27 +206,31 @@ const AddTransaction: React.FC = () => {
                                 />
                             </div>
 
-                            <div>
-                                <label>Amount Credit</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    className="form-input"
-                                    value={form.amount_in}
-                                    onChange={(e) => handleChange('amount_in', Number(e.target.value))}
-                                />
-                            </div>
+                            {transactionMode === 'Credit' && (
+                                <div>
+                                    <label>Amount Credit</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        className="form-input"
+                                        value={form.amount_in}
+                                        onChange={(e) => handleChange('amount_in', e.target.value)}
+                                    />
+                                </div>
+                            )}
 
-                            <div>
-                                <label>Amount Debit</label>
-                                <input
-                                    type="number"
-                                    step="0.01"
-                                    className="form-input"
-                                    value={form.amount_out}
-                                    onChange={(e) => handleChange('amount_out', Number(e.target.value))}
-                                />
-                            </div>
+                            {transactionMode === 'Debit' && (
+                                <div>
+                                    <label>Amount Debit</label>
+                                    <input
+                                        type="number"
+                                        step="0.01"
+                                        className="form-input"
+                                        value={form.amount_out}
+                                        onChange={(e) => handleChange('amount_out', e.target.value)}
+                                    />
+                                </div>
+                            )}
 
                             <div>
                                 <label>Cost</label>
@@ -184,7 +239,7 @@ const AddTransaction: React.FC = () => {
                                     step="0.01"
                                     className="form-input"
                                     value={form.cost}
-                                    onChange={(e) => handleChange('cost', Number(e.target.value))}
+                                    onChange={(e) => handleChange('cost', e.target.value)}
                                 />
                             </div>
 
@@ -195,7 +250,7 @@ const AddTransaction: React.FC = () => {
                                     step="0.01"
                                     className="form-input"
                                     value={form.due_amount}
-                                    onChange={(e) => handleChange('due_amount', Number(e.target.value))}
+                                    onChange={(e) => handleChange('due_amount', e.target.value)}
                                 />
                             </div>
 
@@ -206,10 +261,9 @@ const AddTransaction: React.FC = () => {
                                     step="0.01"
                                     className="form-input"
                                     value={form.return_amount}
-                                    onChange={(e) => handleChange('return_amount', Number(e.target.value))}
+                                    onChange={(e) => handleChange('return_amount', e.target.value)}
                                 />
                             </div>
-                 
 
                             <div className="md:col-span-3">
                                 <label className="text-sm">Note</label>
@@ -221,6 +275,7 @@ const AddTransaction: React.FC = () => {
                                 />
                             </div>
                         </div>
+
                         <div className="flex justify-end">
                             <button type="button" className="btn btn-primary" onClick={addTransactionRow}>
                                 Add Transaction

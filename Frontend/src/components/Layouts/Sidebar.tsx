@@ -93,29 +93,6 @@ const Sidebar = () => {
                                 </NavLink>
                             </li>
 
-                            {/*----------- Relationship -----------*/}
-                            <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'Relationship' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('Relationship')}>
-                                    <div className="flex items-center">
-                                        <IconMenuUsers className="group-hover:!text-primary shrink-0" />
-                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Relationship')}</span>
-                                    </div>
-
-                                    <div className={currentMenu !== 'Relationship' ? 'rtl:rotate-90 -rotate-90' : ''}>
-                                        <IconCaretDown />
-                                    </div>
-                                </button>
-                                <AnimateHeight duration={300} height={currentMenu === 'Relationship' ? 'auto' : 0}>
-                                    <ul className="sub-menu text-gray-500">
-                                        <li>
-                                            <NavLink to="/pages/relationship/customers">{t('Customers')}</NavLink>
-                                        </li>
-                                        <li>
-                                            <NavLink to="/pages/relationship/suppliers">{t('Suppliers')}</NavLink>
-                                        </li>
-                                    </ul>
-                                </AnimateHeight>
-                            </li>
 
                                                         {/*----------- Accounts -----------*/}
                             <li className="menu nav-item">
@@ -141,6 +118,32 @@ const Sidebar = () => {
                                     </ul>
                                 </AnimateHeight>
                             </li>
+
+
+                                                        {/*----------- Relationship -----------*/}
+                            <li className="menu nav-item">
+                                <button type="button" className={`${currentMenu === 'Relationship' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('Relationship')}>
+                                    <div className="flex items-center">
+                                        <IconMenuUsers className="group-hover:!text-primary shrink-0" />
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Relationship')}</span>
+                                    </div>
+
+                                    <div className={currentMenu !== 'Relationship' ? 'rtl:rotate-90 -rotate-90' : ''}>
+                                        <IconCaretDown />
+                                    </div>
+                                </button>
+                                <AnimateHeight duration={300} height={currentMenu === 'Relationship' ? 'auto' : 0}>
+                                    <ul className="sub-menu text-gray-500">
+                                        <li>
+                                            <NavLink to="/pages/relationship/customers">{t('Customers')}</NavLink>
+                                        </li>
+                                        <li>
+                                            <NavLink to="/pages/relationship/suppliers">{t('Suppliers')}</NavLink>
+                                        </li>
+                                    </ul>
+                                </AnimateHeight>
+                            </li>
+
 
                             {/*----------- Inventory -----------*/}
                             <li className="menu nav-item">

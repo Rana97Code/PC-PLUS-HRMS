@@ -7,7 +7,6 @@ import IconMail from '../../../components/Icon/IconMail';
 import IconPhone from '../../../components/Icon/IconPhone';
 import IconFile from '../../../components/Icon/IconFile';
 import IconTrashLines from '../../../components/Icon/IconTrashLines';
-import change from "../../../../public/assets/images/change-password.svg"
 import { jwtDecode } from "jwt-decode";
 import axios from 'axios';
 import UserContex from '../../../context/UserContex';
@@ -164,7 +163,9 @@ const profile = () => {
     
     }
 
-
+const imageUrl = userProfile
+  ? `https://api.erp.pcplusbd.com/uploads/images/${userProfile}`
+  : "/assets/images/users/man.jpg";
 
 
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
@@ -181,7 +182,7 @@ const profile = () => {
                         </div>
                         <div className="mb-6">
                             <div className="flex flex-col justify-center items-center">
-                                <img src={'/assets/images/users/'+ userProfile} alt="img" className="w-24 h-24 rounded-full object-cover  mb-5" />
+                                <img src={imageUrl} alt="Profile" className="w-24 h-24 rounded-full object-cover  mb-5" />
                                 <p className="font-semibold text-primary text-xl">{username}</p>
                             </div>
                             <ul className="mt-5 flex flex-col max-w-[160px] m-auto space-y-4 font-semibold text-white-dark">
@@ -198,7 +199,7 @@ const profile = () => {
                                     </span>
                                 </li>
                                 <button type="button" className="btn btn-success ">
-                                    <img src={change} alt="" className='w-8 h-8' />
+                                    <img src="/assets/images/change-password.svg" alt="" className='w-8 h-8' />
                                     <span className="whitespace-nowrap" dir="ltr">
                                         Change password
                                     </span>

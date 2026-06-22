@@ -4,8 +4,11 @@ from app.models.user_model import User,UserRead,UserSchema
 from app.routes.auth_router import get_current_active_user;
 from sqlalchemy.orm import Session
 from pathlib import *
+from fastapi.staticfiles import StaticFiles
 
-IMAGEDIR = Path('../react-ant/public/images/')
+BASE_DIR = Path(__file__).resolve().parent
+IMAGEDIR = BASE_DIR / "uploads" / "images"
+IMAGEDIR.mkdir(parents=True, exist_ok=True)
 
 user_router = APIRouter()
 

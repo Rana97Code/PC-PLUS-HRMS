@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import logo from '/assets/images/Govt/govt.png';
+import logo from '@/assets/images/Govt/govt.png';
 import IconFile from '../../../../components/Icon/IconFile';
 
 // import * as $ from 'jquery';

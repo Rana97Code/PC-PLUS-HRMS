@@ -82,7 +82,7 @@ const LocalSalesMushuk: React.FC = () => {
         <div className='p-1'>
             <div className="items-center justify-between flex-wrap text-black m-6 grid grid-cols-3 gap-4">
                 <div>
-                    <img className="w-28 ml-[5px] flex-none" src="/assets/images/Govt/govt.png" />
+                    <img className="w-28 ml-[5px] flex-none" src="@/assets/images/Govt/govt.png" />
                 </div>
                 <div className="font-bold text-center grid grid-rows-2 grid-flow-col gap-4 pt-8">
                     <h3 className='text-xl'>গনপ্রজাতন্ত্রী বাংলাদেশ সরকার</h3>

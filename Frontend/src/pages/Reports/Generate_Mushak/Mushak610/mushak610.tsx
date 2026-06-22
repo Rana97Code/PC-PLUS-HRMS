@@ -2,7 +2,7 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import IconFile from '../../../../components/Icon/IconFile';
-import logo from '/assets/images/Govt/govt.png';
+import logo from '@/assets/images/Govt/govt.png';
 import axios from 'axios';
 import { number } from 'yup';
 

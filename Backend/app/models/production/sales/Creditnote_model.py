@@ -11,18 +11,18 @@ class CreditNote(Base):
     __tablename__ = 'credit_note'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    credit_note_no = Column(String, nullable=True)
+    credit_note_no = Column(String(50), nullable=True)
     credit_note_type = Column(Integer, nullable=True)
     cn_issue_date = Column(Date, nullable=True)
     sales_id = Column(BigInteger, nullable=True)
     customer_id = Column(BigInteger, nullable=True)
-    vehicle_info = Column(String, nullable=True)
+    vehicle_info = Column(String(255), nullable=True)
     total_sd = Column(Numeric(precision=10, scale=2), nullable=True)
     total_vat = Column(Numeric(precision=10, scale=2), nullable=True)
     grand_total = Column(Numeric(precision=10, scale=2), nullable=True)
-    notes = Column(String, nullable=True)
+    notes = Column(String(255), nullable=True)
     user_id = Column(BigInteger, nullable=True)
-    created_at = Column(Date, server_default=func.now(), nullable=False)
+    created_at = Column(Date, default=datetime.utcnow, nullable=False)
 
 
 class CreditNoteItem(Base):
@@ -31,7 +31,7 @@ class CreditNoteItem(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     credit_note_id = Column(BigInteger, nullable=True)
     item_id = Column(BigInteger, nullable=True)
-    item_name = Column(String, nullable=True)
+    item_name = Column(String(255), nullable=True)
     qty = Column(Numeric(precision=10, scale=2), nullable=True)
     rate = Column(Numeric(precision=10, scale=2), nullable=True)
     sales_amount = Column(Numeric(precision=10, scale=2), nullable=True)
@@ -43,7 +43,6 @@ class CreditNoteItem(Base):
     return_amount = Column(Numeric(precision=10, scale=2), nullable=True)
     return_vat = Column(Numeric(precision=10, scale=2), nullable=True)
     return_sd = Column(Numeric(precision=10, scale=2), nullable=True)
-    entry_date = Column(Date, nullable=True, server_default=func.now())
-    created_at = Column(Date, nullable=False, server_default=func.now())
+    entry_date = Column(Date, nullable=True,default=datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow, index=True)
 
-Base.metadata.create_all(bind=engine)

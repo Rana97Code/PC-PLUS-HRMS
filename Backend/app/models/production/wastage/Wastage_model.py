@@ -20,6 +20,5 @@ class Wastage(Base):
     status = Column(Integer, nullable=True, name="status")
     production_date = Column(Date, nullable=True, name="production_date")
     user_id = Column(Integer, nullable=True, name="user_id")
-    created_at = Column(Date, nullable=False, server_default=func.now(), name="created_at")
+    created_at = Column(Date, nullable=False, default=datetime.utcnow, name="created_at")
 
-Base.metadata.create_all(bind=engine)

@@ -13,7 +13,7 @@ class Country(Base):
     phone_code = Column(String(255),unique=False,index=True)
     
 
-Base.metadata.create_all(bind=engine)
+
 
 class CountryCreateSchema(BaseModel):
     sortname:str

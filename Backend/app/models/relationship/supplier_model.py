@@ -22,7 +22,7 @@ class Supplier(Base):
     updated_at = Column(DateTime,index=True, default=datetime.utcnow())
 
 
-Base.metadata.create_all(bind=engine)
+
 
 class SupplierCreateSchema(BaseModel):
     supplier_name:str

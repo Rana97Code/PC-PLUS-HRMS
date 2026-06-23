@@ -11,8 +11,8 @@ class ReceiveVds(Base):
     __tablename__ = 'receive_vds'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    receive_vds_no = Column(String, nullable=True)
-    vds_certificate_no = Column(String, nullable=True)
+    receive_vds_no = Column(String(200), nullable=True)
+    vds_certificate_no = Column(String(200), nullable=True)
     vds_type = Column(Integer, nullable=True)
     vds_receive_date = Column(Date, nullable=True)
     customer_id = Column(BigInteger, nullable=True)
@@ -20,16 +20,16 @@ class ReceiveVds(Base):
     total_vds = Column(Numeric(precision=10, scale=2), nullable=True)
     total_value = Column(Numeric(precision=10, scale=2), nullable=True)
     total_receive = Column(Numeric(precision=10, scale=2), nullable=True)
-    notes = Column(String, nullable=True)
+    notes = Column(String(200), nullable=True)
     user_id = Column(BigInteger, nullable=True)
-    created_at = Column(Date, nullable=False, server_default=func.now())
+    created_at = Column(Date, nullable=False, default=datetime.utcnow)
 
 class ReceiveVdsItems(Base):
     __tablename__ = 'receive_vds_items'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     vds_id = Column(BigInteger, nullable=True)
-    vds_invoice = Column(String, nullable=True)
+    vds_invoice = Column(String(200), nullable=True)
     sales_date = Column(Date, nullable=True)
     sales_id = Column(BigInteger, nullable=True)
     customer_id = Column(BigInteger, nullable=True)
@@ -38,11 +38,10 @@ class ReceiveVdsItems(Base):
     vds_amount = Column(Numeric(precision=10, scale=2), nullable=True)
     receive_qty = Column(Numeric(precision=10, scale=2), nullable=True)
     receive_amount = Column(Numeric(precision=10, scale=2), nullable=True)
-    bank_name = Column(String, nullable=True)
-    branch_name = Column(String, nullable=True)
-    account_no = Column(String, nullable=True)
-    deposit_serial = Column(String, nullable=True)
+    bank_name = Column(String(200), nullable=True)
+    branch_name = Column(String(200), nullable=True)
+    account_no = Column(String(200), nullable=True)
+    deposit_serial = Column(String(200), nullable=True)
     deposit_date = Column(Date, nullable=True)
-    created_at = Column(Date, nullable=False, server_default=func.now())
+    created_at = Column(Date, nullable=False, default=datetime.utcnow)
 
-Base.metadata.create_all(bind=engine)

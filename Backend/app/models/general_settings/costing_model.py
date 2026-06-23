@@ -20,7 +20,7 @@ class Costing(Base):
 
 
 
-Base.metadata.create_all(bind=engine)
+
 
 class CostingCreateSchema(BaseModel):
     costing_name: str

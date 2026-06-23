@@ -35,7 +35,7 @@ class Hscode(Base):
 
     
 
-Base.metadata.create_all(bind=engine)
+
 
 class HscodeCreateSchema(BaseModel):
     # heading:str

@@ -16,7 +16,7 @@ class Stock(Base):
     total_value = Column(Float, nullable=True)
     status = Column(Integer, nullable=True)
     user_id = Column(Integer, nullable=True)
-    created_at = Column(Date, server_default=func.now())
+    created_at = Column(Date, default=datetime.utcnow)
 
 
 
@@ -25,13 +25,12 @@ class StockHistory(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     item_id = Column(Integer, nullable=False)
-    action_tbl = Column(String, nullable=False)
+    action_tbl = Column(String(200), nullable=False)
     action_tbl_id = Column(Integer, nullable=True)
     previous_stock = Column(Numeric(precision=10, scale=2), nullable=True)
     qty = Column(Numeric(precision=10, scale=2), nullable=True)
-    action_type = Column(String, nullable=True)
+    action_type = Column(String(200), nullable=True)
     status = Column(Integer, nullable=True)
     user_id = Column(Integer, nullable=True)
-    created_at = Column(Date, server_default=func.now(), nullable=False)
+    created_at = Column(Date, default=datetime.utcnow, nullable=False)
 
-Base.metadata.create_all(bind=engine)

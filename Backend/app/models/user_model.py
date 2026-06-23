@@ -19,7 +19,7 @@ class User(Base):
     def verify_password(self, user_password: str):
         return _hash.bcrypt.verify(user_password, self.user_password)
 
-Base.metadata.create_all(bind=engine)
+
 
 class UserCreateSchema(BaseModel):
     user_name:str

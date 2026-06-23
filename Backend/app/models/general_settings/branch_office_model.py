@@ -18,7 +18,7 @@ class Branch_office(Base):
 
 
 
-Base.metadata.create_all(bind=engine)
+
 
 class Branch_officeCreateSchema(BaseModel):
     branch_office_name : str

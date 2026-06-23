@@ -32,6 +32,7 @@ const Header = () => {
     const navigate = useNavigate();
     const user = useContext(UserContex);
     const baseUrl = user.base_url;
+    const imageUrl = user.image_url;
     const headers = user.headers;
 
 
@@ -68,7 +69,11 @@ const Header = () => {
             const response = await axios.get(`${baseUrl}/get_me/${user?.email}`, { headers });
             const data = response.data;
             setName(data.user_email);
-            setProfile(data.user_img);
+            if (data.user_img) {
+                setProfile(`${imageUrl}/${data.user_img}`);
+            } else {
+                setProfile(`/assets/images/users/profile.png`);
+            }
         } catch (error) {
             console.error('Error fetching user details:', error);
         }
@@ -151,13 +156,13 @@ const Header = () => {
                         
                         <div className="dropdown shrink-0 flex">
                             <Dropdown offset={[0, 8]} placement={`${isRtl ? 'bottom-start' : 'bottom-end'}`}  btnClassName="relative group block"
-                                button={<img className="w-9 h-9 rounded-full object-cover saturate-50 group-hover:saturate-100" src={`/assets/images/users/${userprofile ? userprofile : 'profile.png'}`} alt="userProfile" />}
+                                button={<img className="w-9 h-9 rounded-full object-cover saturate-50 group-hover:saturate-100" src={`${userprofile}`} alt="userProfile" />}
                             >
                                 <ul className="text-dark dark:text-white-dark !py-0 w-[230px] font-semibold dark:text-white-light/90">
                                     <li>
                                         <div className="flex items-center px-4 py-4">
                                     
-                                            <img className="rounded-md w-10 h-10 object-cover"  src={`/assets/images/users/${userprofile ? userprofile : 'profile.png'}`} alt="userProfile" />
+                                            <img className="rounded-md w-10 h-10 object-cover"  src={userprofile} alt="userProfile" />
 
                                             <div className="ltr:pl-4 rtl:pr-4 truncate">
                                                 <h4 className="text-base">

@@ -20,7 +20,7 @@ class Item(Base):
     created_at = Column(DateTime,index=True, default=datetime.utcnow())
     # prod = relationship(Product)
 
-Base.metadata.create_all(bind=engine)
+
 
 class ItemCreateSchema(BaseModel):
     item_name:str

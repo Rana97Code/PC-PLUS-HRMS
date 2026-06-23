@@ -10,6 +10,7 @@ import UserContex from '../../../context/UserContex';
 const Profile = () => {
     const user = useContext(UserContex);
     const baseUrl = user.base_url;
+    const imageUrl = user.image_url;
     const headers = user.headers;
     const navigate = useNavigate();
 
@@ -22,7 +23,6 @@ const Profile = () => {
     const [profileFile, setProfileFile] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState('');
 
-    const defaultImage = '/assets/images/users/user-profile.jpeg';
 
     useEffect(() => {
         if (!user?.token) {
@@ -46,9 +46,9 @@ const Profile = () => {
             setUserImg(data.user_img || '');
 
             if (data.user_img) {
-                setPreviewImage(`/assets/images/users/${data.user_img}`);
+                setPreviewImage(`${imageUrl}/${data.user_img}`);
             } else {
-                setPreviewImage(defaultImage);
+                setPreviewImage(`/assets/images/users/profile.png`);
             }
         } catch (error) {
             console.error('Error fetching profile:', error);
@@ -63,6 +63,7 @@ const Profile = () => {
             setPreviewImage(URL.createObjectURL(file));
         }
     };
+
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
@@ -128,7 +129,7 @@ const Profile = () => {
                     <div className="flex flex-col items-center text-center">
                         <div className="relative">
                             <img
-                                src={previewImage || defaultImage}
+                                src={previewImage}
                                 alt="Profile"
                                 className="w-32 h-32 rounded-full object-cover border-4 border-primary shadow"
                             />
@@ -216,7 +217,7 @@ const Profile = () => {
                                 <p className="text-sm text-white-dark">
                                     Current image:{' '}
                                     <span className="font-semibold text-primary">
-                                        {userImg || 'No image uploaded'}
+                                        {previewImage || 'No image uploaded'}
                                     </span>
                                 </p>
                             </div>

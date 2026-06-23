@@ -18,7 +18,7 @@ class Authorised_person(Base):
     created_at = Column(DateTime, nullable=True, default=func.now())
     user_id = Column(Integer, nullable=True)
     
-Base.metadata.create_all(bind=engine) 
+ 
 
 class Authorised_personCreateSchema(BaseModel):
     authorised_person_name: str

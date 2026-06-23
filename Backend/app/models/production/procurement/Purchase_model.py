@@ -67,4 +67,3 @@ class Purchase_item(Base):
     purchase = relationship("Purchase", back_populates="purchase_items")
     item = relationship("Item")  # Assuming a relationship with Item
     
-Base.metadata.create_all(bind=engine)

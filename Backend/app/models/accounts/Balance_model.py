@@ -19,7 +19,7 @@ class Balance(Base):
     current_balance = Column(Float, default=0)
     status = Column(Integer, nullable=True)
     created_by = Column(Integer, nullable=True)
-    created_at = Column(Date, server_default=func.now())
+    created_at = Column(Date, default=datetime.utcnow)
 
-    Base.metadata.create_all(bind=engine)
+    
 

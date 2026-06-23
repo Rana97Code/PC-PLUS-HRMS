@@ -10,25 +10,25 @@ class Bom(Base):
     __tablename__ = 'bom'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    item_sku = Column(String, nullable=True, name="item_sku")
-    bom_no = Column(String, nullable=True, name="bom_no")
-    product_code = Column(String, nullable=True, name="product_code")
+    item_sku = Column(String(200), nullable=True, name="item_sku")
+    bom_no = Column(String(200), nullable=True, name="bom_no")
+    product_code = Column(String(200), nullable=True, name="product_code")
     item_id = Column(Integer, nullable=True, name="item_id")
-    hs_code = Column(String, nullable=True, name="hs_code")
-    unit_name = Column(String, nullable=True, name="unit_name")
-    remarks = Column(String, nullable=True)
-    reference = Column(String, nullable=True)
+    hs_code = Column(String(200), nullable=True, name="hs_code")
+    unit_name = Column(String(200), nullable=True, name="unit_name")
+    remarks = Column(String(200), nullable=True)
+    reference = Column(String(200), nullable=True)
     total_costing = Column(Numeric(precision=10, scale=2), nullable=True, name="total_costing")
     item_price = Column(Numeric(precision=10, scale=2), nullable=True, name="item_price")
     sales_price = Column(Numeric(precision=10, scale=2), nullable=True, name="sales_price")
-    service_code = Column(String, nullable=True, name="service_code")
+    service_code = Column(String(200), nullable=True, name="service_code")
     status = Column(Integer, nullable=True)
     mrp_type = Column(Integer, nullable=True, name="mrp_type")
     bom_type = Column(Integer, nullable=True, name="bom_type")
     submission_date = Column(Date, nullable=True, name="submission_date")
     effective_date = Column(Date, nullable=True, name="effective_date")
     user_id = Column(Integer, nullable=True, name="user_id")
-    created_at = Column(Date, nullable=False, server_default=func.now(), name="created_at")
+    created_at = Column(Date, nullable=False, default=datetime.utcnow, name="created_at")
 
 
 class BomCosting(Base):
@@ -39,7 +39,7 @@ class BomCosting(Base):
     costing_id = Column(Integer, nullable=True, name="costing_id")
     cost = Column(Numeric(precision=10, scale=2), nullable=True, name="cost")
     user_id = Column(Integer, nullable=True, name="user_id")
-    created_at = Column(Date, nullable=False, server_default=func.now(), name="created_at")
+    created_at = Column(Date, nullable=False, default=datetime.utcnow, name="created_at")
 
 class BomRawMaterials(Base):
     __tablename__ = 'bom_raw_materials'
@@ -47,7 +47,7 @@ class BomRawMaterials(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     bom_id = Column(Integer, nullable=True, name="bom_id")
     raw_material_id = Column(Integer, nullable=True, name="raw_material_id")
-    unit_name = Column(String, nullable=True, name="unit_name")
+    unit_name = Column(String(200), nullable=True, name="unit_name")
     material_qty = Column(Numeric(precision=10, scale=2), nullable=True, name="material_qty")
     material_rate = Column(Numeric(precision=10, scale=2), nullable=True, name="material_rate")
     material_price = Column(Numeric(precision=10, scale=2), nullable=True, name="material_price")
@@ -58,6 +58,5 @@ class BomRawMaterials(Base):
     total_price = Column(Numeric(precision=10, scale=2), nullable=True, name="total_price")
     c_date = Column(Date, nullable=True, name="c_date")
     user_id = Column(Integer, nullable=True, name="user_id")
-    created_at = Column(Date, nullable=False, server_default=func.now(), name="created_at")
+    created_at = Column(Date, nullable=False, default=datetime.utcnow, name="created_at")
 
-Base.metadata.create_all(bind=engine)

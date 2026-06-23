@@ -1,32 +1,33 @@
-from sqlalchemy import create_engine,MetaData
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 import os
 
+
 load_dotenv()
 
-
-metadata = MetaData()
-#for local mysql: mySQL workbench:
-# SQLALCHEMY_DATABASE_URL = "mysql+mysqldb://root:Bmit123@localhost:3306/bmitvatdb"
-
-#PostgreSQL:::active now;
-# SQLALCHEMY_DATABASE_URL = "postgresql://postgres:12345678@localhost:5432/pchrmsdb"
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
 
-#Database connection
-engine=create_engine(SQLALCHEMY_DATABASE_URL)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+if not SQLALCHEMY_DATABASE_URL:
+    raise Exception("DATABASE_URL not found")
 
-metadata.create_all(engine)
+engine = create_engine(
+    SQLALCHEMY_DATABASE_URL,
+    pool_pre_ping=True,
+    pool_recycle=280
+)
+
+SessionLocal = sessionmaker(
+    autocommit=False,
+    autoflush=False,
+    bind=engine
+)
 
 Base = declarative_base()
 
-#Session Generate
+
 def get_db():
-    db=SessionLocal()
+    db = SessionLocal()
     try:
         yield db
     finally:

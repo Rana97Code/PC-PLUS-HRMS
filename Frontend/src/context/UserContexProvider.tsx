@@ -9,6 +9,7 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const location = useLocation();
 
     const [base_url, setBaseUrl] = useState<string | null>(null);
+    const [image_url, setImageUrl] = useState<string | null>(null);
     const [token, setToken] = useState<string | null>(null);
     const [headers, setHeaders] = useState<any | null>(null);
     const [email, setUserEmail] = useState<string | null>(null);
@@ -17,11 +18,17 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     useEffect(() => {
         const baseUrl = import.meta.env.VITE_APP_BASE_URL;
+        const imageUrl = import.meta.env.VITE_APP_API_IMAGE_URL;
 
         if (baseUrl) {
             setBaseUrl(baseUrl);
         } else {
             console.error("VITE_APP_BASE_URL environment variable is not set");
+        }
+        if (imageUrl) {
+            setImageUrl(imageUrl);
+        } else {
+            console.error("VITE_APP_API_IMAGE_URL environment variable is not set");
         }
 
         const validateToken = () => {
@@ -81,8 +88,8 @@ const UserContextProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [navigate, location.pathname]);
 
     const contextValue = useMemo(
-        () => ({ base_url, token, headers, email }),
-        [base_url, token, headers, email]
+        () => ({ base_url, image_url, token, headers, email }),
+        [base_url, image_url, token, headers, email]
     );
 
     return (

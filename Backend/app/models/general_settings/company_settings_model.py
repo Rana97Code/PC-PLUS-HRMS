@@ -37,7 +37,7 @@ class Company_settings(Base):
 
 
 
-Base.metadata.create_all(bind=engine)
+
 
 class Company_settingsCreateSchema(BaseModel):
     company_name:str

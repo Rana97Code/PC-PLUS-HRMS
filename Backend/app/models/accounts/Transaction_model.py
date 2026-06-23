@@ -26,5 +26,5 @@ class Transaction(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, index=True)
     updated_by = Column(Integer, nullable=True)
 
-Base.metadata.create_all(bind=engine)
+
 

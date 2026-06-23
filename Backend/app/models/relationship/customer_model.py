@@ -26,7 +26,7 @@ class Customer(Base):
     updated_at = Column(DateTime,index=True, default=datetime.utcnow())
 
 
-Base.metadata.create_all(bind=engine)
+
 
 class CustomerCreateSchema(BaseModel):
     passport_no:str

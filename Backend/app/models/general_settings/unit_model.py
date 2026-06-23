@@ -13,7 +13,7 @@ class Unit(Base):
     # prod = relationship(Product)
 
 
-Base.metadata.create_all(bind=engine)
+
 
 class UnitCreateSchema(BaseModel):
     unit_name:str

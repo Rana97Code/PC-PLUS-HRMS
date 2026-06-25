@@ -143,14 +143,14 @@ const TransactionInvoice = () => {
                     <div className="overflow-x-auto print-table-wrapper">
                         <table className="invoice-table w-full border border-gray-300 text-sm">
                             <thead>
-                                <tr style={{ backgroundColor: '#0064C8', color: '#ffffff' }}>
+                                <tr className="invoice-table-head">
                                     <th className="border p-2">SL</th>
                                     <th className="border p-2">Date</th>
                                     <th className="border p-2">Type</th>
                                     <th className="border p-2">By</th>
                                     <th className="border p-2">To</th>
-                                    <th className="border p-2">Amount In</th>
-                                    <th className="border p-2">Amount Out</th>
+                                    <th className="border p-2">Amount Credit</th>
+                                    <th className="border p-2">Amount Debit</th>
                                     <th className="border p-2">Cost</th>
                                     <th className="border p-2">Due</th>
                                     <th className="border p-2">Return</th>
@@ -177,7 +177,7 @@ const TransactionInvoice = () => {
                             </tbody>
 
                             <tfoot>
-                                <tr style={{ backgroundColor: '#0064C8', color: '#ffffff' }}>
+                                <tr className="invoice-table-foot">
                                     <td className="border p-2 text-right" colSpan={5}>
                                         Total
                                     </td>
@@ -205,66 +205,79 @@ const TransactionInvoice = () => {
             </div>
 
             <style>
-                {`
-                    @media print {
-                        body {
-                            background: white !important;
-                        }
+            {`
+                :root {
+                    --invoice-theme-bg: #0064C8;
+                    --invoice-theme-text: #ffffff;
+                }
 
-                        .no-print {
-                            display: none !important;
-                        }
+                .dark {
+                    --invoice-theme-bg: #1E40AF;
+                    --invoice-theme-text: #ffffff;
+                }
 
-                        .invoice-print-area {
-                            width: 100% !important;
-                            max-width: 100% !important;
-                            padding: 0 !important;
-                            margin: 0 !important;
-                            box-shadow: none !important;
-                            border-radius: 0 !important;
-                            background: white !important;
-                            color: black !important;
-                        }
+                .invoice-table-head th,
+                .invoice-table-foot td {
+                    background-color: var(--invoice-theme-bg) !important;
+                    color: var(--invoice-theme-text) !important;
+                }
 
-                        .print-table-wrapper {
-                            overflow: visible !important;
-                        }
-
-                        .invoice-table {
-                            width: 100% !important;
-                            table-layout: fixed !important;
-                            border-collapse: collapse !important;
-                            font-size: 9px !important;
-                        }
-
-                        .invoice-table th,
-                        .invoice-table td {
-                            padding: 4px !important;
-                            word-break: break-word !important;
-                            white-space: normal !important;
-                        }
-
-                        .invoice-table th {
-                            background-color: #0064C8 !important;
-                            color: #ffffff !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-
-                        .invoice-table tfoot tr {
-                            background-color: #0064C8 !important;
-                            color: #ffffff !important;
-                            -webkit-print-color-adjust: exact !important;
-                            print-color-adjust: exact !important;
-                        }
-
-                        @page {
-                            size: A4 landscape;
-                            margin: 8mm;
-                        }
+                @media print {
+                    * {
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
                     }
-                `}
-            </style>
+
+                    body {
+                        background: white !important;
+                    }
+
+                    .no-print {
+                        display: none !important;
+                    }
+
+                    .invoice-print-area {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        padding: 0 !important;
+                        margin: 0 !important;
+                        box-shadow: none !important;
+                        border-radius: 0 !important;
+                        background: white !important;
+                        color: black !important;
+                    }
+
+                    .print-table-wrapper {
+                        overflow: visible !important;
+                    }
+
+                    .invoice-table {
+                        width: 100% !important;
+                        table-layout: fixed !important;
+                        border-collapse: collapse !important;
+                        font-size: 9px !important;
+                    }
+
+                    .invoice-table th,
+                    .invoice-table td {
+                        padding: 4px !important;
+                        word-break: break-word !important;
+                        white-space: normal !important;
+                    }
+
+                    .invoice-table-head th,
+                    .invoice-table-foot td {
+                        background-color: var(--invoice-theme-bg) !important;
+                        color: var(--invoice-theme-text) !important;
+                    }
+
+                    @page {
+                        size: A4 landscape;
+                        margin: 8mm;
+                    }
+                }
+            `}
+        </style>
         </div>
     );
 };

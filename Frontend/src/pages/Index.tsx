@@ -510,10 +510,6 @@ const Index = () => {
             return `${Math.round((value / grandTotal) * 100)}%`;
         };
 
-        // const formatTk = (value: number) => {
-        //     return `Tk${Number(value || 0).toLocaleString()}`;
-        // };
-
     
 
     return (
@@ -555,7 +551,7 @@ const Index = () => {
                             </div>
                         </div>
                         <p className="text-lg dark:text-white-light/90">
-                            Total Office Summary<span className="text-primary ml-2">{"Investment : " + chartData.office_investment.reduce((a: number, b: number) => a + b, 0) + ", Expenses : " + chartData.expenses.reduce((a: number, b: number) => a + b, 0) + ", Revenue : " + (chartData.income.reduce((a: number, b: number) => a + b, 0) - chartData.expenses.reduce((a: number, b: number) => a + b, 0))}</span>
+                            Total Office Summary<span className="text-primary ml-2">{"Investment : " + chartData.office_investment.reduce((a: number, b: number) => a + b, 0) + ", Expenses : " + chartData.expenses.reduce((a: number, b: number) => a + b, 0) + ", Revenue : " + Math.max(0,chartData.income.reduce((a: number, b: number) => a + b, 0) - chartData.expenses.reduce((a: number, b: number) => a + b, 0))}</span>
                         </p>
                         <div className="relative">
                             <div className="bg-white dark:bg-black rounded-lg overflow-hidden">

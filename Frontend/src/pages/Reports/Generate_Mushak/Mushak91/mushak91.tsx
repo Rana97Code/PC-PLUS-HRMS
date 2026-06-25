@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import logo from '/assets/images/Govt/govt.png';
 import IconFile from '../../../../components/Icon/IconFile';
 
 // import * as $ from 'jquery';
@@ -44,7 +43,7 @@ const mushak91: React.FC = () => {
     // const [all_suggestitm, setSuggestItem] = useState<suggestItem[]>([]);
     // const [itemId, setSelectItemId] = useState("");
 
-
+const logo = "/assets/images/Govt/govt.png";
     useEffect(() => {
         const token = localStorage.getItem('Token');
         if (token) {

@@ -54,7 +54,8 @@ const TransactionIndex = () => {
                 item.transaction_invoice?.toLowerCase().includes(query) ||
                 item.transaction_type?.toLowerCase().includes(query) ||
                 item.transaction_date?.toString().toLowerCase().includes(query) ||
-                item.cost?.toString().includes(query) ||
+                item.amount_in?.toString().includes(query) ||
+                item.amount_out?.toString().includes(query) ||
                 item.transaction_by?.toLowerCase().includes(query)
             );
         });
@@ -123,7 +124,8 @@ const TransactionIndex = () => {
                                 { accessor: 'transaction_type', title: 'Type', sortable: true },
                                 { accessor: 'transaction_date', title: 'Date', sortable: true },
                                 { accessor: 'transaction_by', title: 'Transaction By', sortable: true },
-                                { accessor: 'cost', title: 'Cost', sortable: true },
+                                { accessor: 'amount_in', title: 'Credit', sortable: true },
+                                { accessor: 'amount_out', title: 'Debit', sortable: true },
                             ]}
                             totalRecords={filteredRecords.length}
                             recordsPerPage={pageSize}

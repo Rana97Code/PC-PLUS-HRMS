@@ -6,6 +6,7 @@ import IconLockDots from '../../components/Icon/IconLockDots';
 import IconUser from '../../components/Icon/IconUser';
 import axios from 'axios';
 import UserContex from '../../context/UserContex';
+import Swal from 'sweetalert2';
 
 const LoginCover = () => {
     const navigate = useNavigate();
@@ -22,24 +23,42 @@ const LoginCover = () => {
         }
     }, [user?.email, navigate]);
 
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
+    try {
         const formData = new FormData();
         formData.append('username', username);
         formData.append('password', password);
 
-        await axios.post(`${baseUrl}/auth`, formData)
-            .then(function (response) {
-                if (response) {
-                    localStorage.setItem('Token', JSON.stringify(response.data.access_token));
-                    navigate("/index");
-                } else {
-                    console.log('Email or Password Error')
-                }
-            })
+        const response = await axios.post(`${baseUrl}/auth`, formData);
 
-    };
+        if (response?.data?.access_token) {
+            localStorage.setItem('Token', JSON.stringify(response.data.access_token));
+            navigate('/index');
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: 'Enter a valid user email and password',
+            });
+        }
+    } catch (error: any) {
+        if (error.response?.status === 401 || error.response?.status === 403 || error.response?.status === 400) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Login Failed',
+                text: 'Enter a valid User Email & Password',
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Something went wrong',
+                text: 'Please try again later',
+            });
+        }
+    }
+};
 
 
     return (
@@ -72,7 +91,7 @@ const LoginCover = () => {
                             </div>
                             <form className="space-y-5 dark:text-white" autoComplete="on" onSubmit={handleSubmit} method='POST' >
                                 <div>
-                                    <label htmlFor="userName">Username</label>
+                                    <label htmlFor="userName">User Email</label>
                                     <div className="relative text-white-dark">
                                         <input id="UserName" type="text"
                                             placeholder="Enter Username"

@@ -2,10 +2,8 @@ import React from 'react';
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useNavigate, useParams } from 'react-router-dom';
 import IconFile from '../../../../components/Icon/IconFile';
-import logo from '/assets/images/Govt/govt.png';
-import axios from 'axios';
 import { number } from 'yup';
-
+import axios from 'axios';
 
 const mushak62: React.FC = () => {
     const navigate = useNavigate();
@@ -19,6 +17,7 @@ const mushak62: React.FC = () => {
     //     const day = String(today.getDate()).padStart(2, '0');
     //     return `${year}-${month}-${day}`;
     // };
+const logo = "/assets/images/Govt/govt.png";
 
     const handlePrintButtonClick = () => {
         window.print();

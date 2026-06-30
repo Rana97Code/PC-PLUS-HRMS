@@ -685,21 +685,25 @@ const Index = () => {
 
                 <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 mb-6">
 
-                   <div className="panel h-full">
+                    <div className="panel">
                         <div className="flex items-center mb-5">
-                            <h5 className="font-semibold text-lg dark:text-white-light">Expenses By Category</h5>
+                            <h5 className="font-semibold text-lg dark:text-white-light">
+                                Expenses By Category
+                            </h5>
                         </div>
-                        <div>
-                            <div className="bg-white dark:bg-black rounded-lg overflow-hidden">
-                                {loading ? (
-                                    <div className="min-h-[325px] grid place-content-center bg-white-light/30 dark:bg-dark dark:bg-opacity-[0.08] ">
-                                        <span className="animate-spin border-2 border-black dark:border-white !border-l-transparent  rounded-full w-5 h-5 inline-flex"></span>
-                                    </div>
-                                ) : (
-                                    <ReactApexChart series={costByCategory.series} options={costByCategory.options} type="donut" height={460} />
-                                )}
+
+                        {loading ? (
+                            <div className="h-[350px] flex items-center justify-center">
+                                <span className="animate-spin border-2 border-black dark:border-white border-l-transparent rounded-full w-6 h-6"></span>
                             </div>
-                        </div>
+                        ) : (
+                            <ReactApexChart
+                                options={costByCategory.options}
+                                series={costByCategory.series}
+                                type="donut"
+                                height={350}
+                            />
+                        )}
                     </div>
 
 

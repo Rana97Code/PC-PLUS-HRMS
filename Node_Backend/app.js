@@ -5,20 +5,26 @@ require("dotenv").config();
 
 const sequelize = require("./config/db");
 
+// Import models so Sequelize knows them
+require("./models/User");
+require("./models/Transaction");
+require("./models/Balance");
+require("./models/Due");
+
 const authController = require("./controllers/authController");
 const userController = require("./controllers/userController");
 const transactionController = require("./controllers/transactionController");
+const dueController = require("./controllers/dueController");
+
+const app = express();
 
 const allowedOrigins = process.env.CORS_ORIGINS
     ? process.env.CORS_ORIGINS.split(",")
     : [
         "http://localhost:5173",
         "http://127.0.0.1:5173",
-        "https://erp.pcplusbd.com",
-        "http://localhost:5173/"
+        "https://erp.pcplusbd.com"
     ];
-
-const app = express();
 
 app.use(cors({
     origin: function (origin, callback) {
@@ -48,13 +54,22 @@ app.get("/", (req, res) => {
 app.use(authController);
 app.use(userController);
 app.use(transactionController);
-
-sequelize.authenticate()
-    .then(() => console.log("Database connected successfully"))
-    .catch((err) => console.error("Database connection failed:", err));
+app.use(dueController);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+sequelize.authenticate()
+    .then(() => {
+        console.log("Database connected successfully");
+        return sequelize.sync(); // creates missing tables
+    })
+    .then(() => {
+        console.log("Database synced successfully");
+
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    })
+    .catch((err) => {
+        console.error("Database connection/sync failed:", err);
+    });

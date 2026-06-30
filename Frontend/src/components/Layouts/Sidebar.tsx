@@ -114,6 +114,9 @@ const Sidebar = () => {
                                         <li>
                                             <NavLink to="/pages/accounts/transaction">{t('Transaction')}</NavLink>
                                         </li>
+                                        <li>
+                                            <NavLink to="/pages/accounts/due">{t('Due')}</NavLink>
+                                        </li>
 
                                     </ul>
                                 </AnimateHeight>

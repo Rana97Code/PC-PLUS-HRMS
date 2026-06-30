@@ -127,13 +127,13 @@ const printInvestorDetails = useReactToPrint({
                 </div>
 
                 <div className="panel bg-white">
-                    <h5 className="font-semibold text-sm">Current Due</h5>
-                    <h2 className="text-2xl font-bold text-warning">{balance.current_due || 0}</h2>
+                    <h5 className="font-semibold text-sm">Payable Due</h5>
+                    <h2 className="text-2xl font-bold text-warning">{balance.payable_due || 0}</h2>
                 </div>
 
                 <div className="panel bg-white">
-                    <h5 className="font-semibold text-sm">Previous Balance</h5>
-                    <h2 className="text-2xl font-bold">{balance.previous_balance || 0}</h2>
+                    <h5 className="font-semibold text-sm">Receivable Due</h5>
+                    <h2 className="text-2xl font-bold">{balance.receivable_due || 0}</h2>
                 </div>
             </div>
 

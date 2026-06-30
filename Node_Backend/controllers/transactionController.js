@@ -4,6 +4,8 @@ const { Op, fn, col, literal } = require("sequelize");
 const Transaction = require("../models/Transaction");
 const Balance = require("../models/Balance");
 const User = require("../models/User");
+const Due = require("../models/Due");
+
 const { getCurrentActiveUser } = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -60,15 +62,18 @@ router.post("/pcplus/api/transaction/add-multiple-transaction", getCurrentActive
             transaction: dbTransaction
         });
 
-        const pre_cost = lastBalance?.current_cost || 0;
-        const pre_due = lastBalance?.current_due || 0;
-        const pre_balance = lastBalance?.current_balance || 0;
+        const pre_cost = Number(lastBalance?.current_cost || 0);
+        const pre_payable_due = Number(lastBalance?.payable_due || 0);
+        const pre_receivable_due = Number(lastBalance?.receivable_due || 0);
+        const pre_balance = Number(lastBalance?.current_balance || 0);
 
         let total_amount_in = 0;
         let total_amount_out = 0;
         let total_cost = 0;
-        let total_due = 0;
         let total_return = 0;
+
+        let total_payable_due = 0;
+        let total_receivable_due = 0;
 
         for (const item of transactions) {
             const amount_in = Number(item.amount_in || 0);
@@ -80,12 +85,22 @@ router.post("/pcplus/api/transaction/add-multiple-transaction", getCurrentActive
             total_amount_in += amount_in;
             total_amount_out += amount_out;
             total_cost += cost;
-            total_due += due_amount;
             total_return += return_amount;
+
+            if (due_amount > 0) {
+                if (item.transaction_type === "Credit") {
+                    total_receivable_due += due_amount;
+                }
+
+                if (item.transaction_type === "Debit") {
+                    total_payable_due += due_amount;
+                }
+            }
 
             await Transaction.create({
                 transaction_date: item.transaction_date,
                 transaction_type: item.transaction_type,
+                transaction_title: item.transaction_title,
                 transaction_by: item.transaction_by,
                 transaction_to: item.transaction_to,
                 transaction_invoice: TransactionInv,
@@ -95,6 +110,10 @@ router.post("/pcplus/api/transaction/add-multiple-transaction", getCurrentActive
                 due_amount,
                 return_amount,
                 transaction_notes: item.transaction_notes,
+
+                // if due amount exists, this invoice is available for due processing
+                status: due_amount > 0 ? 1 : 0,
+
                 created_by: creator.id
             }, { transaction: dbTransaction });
         }
@@ -105,13 +124,19 @@ router.post("/pcplus/api/transaction/add-multiple-transaction", getCurrentActive
             total_return -
             total_amount_out;
 
+        const new_payable_due = pre_payable_due + total_payable_due;
+        const new_receivable_due = pre_receivable_due + total_receivable_due;
+
         await Balance.create({
             previous_cost: pre_cost,
             current_cost: pre_cost + total_cost,
-            previous_due: pre_due,
-            current_due: pre_due + total_due,
+
+            payable_due: new_payable_due,
+            receivable_due: new_receivable_due,
+
             previous_balance: pre_balance,
             current_balance: new_balance,
+
             status: 1,
             created_by: creator.id
         }, { transaction: dbTransaction });
@@ -122,13 +147,22 @@ router.post("/pcplus/api/transaction/add-multiple-transaction", getCurrentActive
             success: true,
             message: "Transactions created successfully",
             invoice_no: TransactionInv,
+
             previous_balance: pre_balance,
             current_balance: new_balance,
+
+            previous_payable_due: pre_payable_due,
+            current_payable_due: new_payable_due,
+
+            previous_receivable_due: pre_receivable_due,
+            current_receivable_due: new_receivable_due,
+
             total_amount_in,
             total_amount_out,
             total_cost,
-            total_due,
-            total_return
+            total_return,
+            total_payable_due,
+            total_receivable_due
         });
 
     } catch (error) {
@@ -146,6 +180,7 @@ router.get("/pcplus/api/transaction/all_transaction", getCurrentActiveUser, asyn
         id: t.id,
         transaction_invoice: t.transaction_invoice,
         transaction_type: t.transaction_type,
+        transaction_title: t.transaction_title,
         transaction_date: t.transaction_date,
         amount_in: t.amount_in,
         amount_out: t.amount_out,
@@ -187,6 +222,7 @@ router.get("/pcplus/api/transaction/transaction_invoice/:id", getCurrentActiveUs
             id: t.id,
             transaction_date: t.transaction_date,
             transaction_type: t.transaction_type,
+            transaction_title: t.transaction_title,
             transaction_by: t.transaction_by,
             transaction_to: t.transaction_to,
             amount_in: t.amount_in,
@@ -220,7 +256,8 @@ router.get("/pcplus/api/accounts/investor-contribution", getCurrentActiveUser, a
         ],
         where: {
             amount_in: { [Op.gt]: 0 },
-            transaction_type: "Office_Investment"
+            transaction_type: "Credit",
+            transaction_title: "Office_Investment"
         },
         group: ["transaction_by"],
         raw: true
@@ -254,8 +291,8 @@ router.get("/pcplus/api/accounts/latest-balance", getCurrentActiveUser, async (r
         return res.json({
             previous_cost: 0,
             current_cost: 0,
-            previous_due: 0,
-            current_due: 0,
+            payable_due: 0,
+            receivable_due: 0,
             previous_balance: 0,
             current_balance: 0
         });
@@ -264,68 +301,189 @@ router.get("/pcplus/api/accounts/latest-balance", getCurrentActiveUser, async (r
     return res.json(balance);
 });
 
+// router.get("/pcplus/api/accounts/monthly-chart", getCurrentActiveUser, async (req, res) => {
+//     const investmentRows = await Transaction.findAll({
+//         attributes: [
+//             [literal("MONTH(transaction_date)"), "month"],
+//             [fn("SUM", col("amount_in")), "amount_in"],
+//             [fn("SUM", col("return_amount")), "return_amount"]
+//         ],
+//         where: { transaction_type: "Credit", transaction_title: "Office_Investment" },
+//         group: [literal("MONTH(transaction_date)")],
+//         raw: true
+//     });
+
+//     const incomeRows = await Transaction.findAll({
+//         attributes: [
+//             [literal("MONTH(transaction_date)"), "month"],
+//             [fn("SUM", col("amount_in")), "amount_in"],
+//             [fn("SUM", col("return_amount")), "return_amount"]
+//         ],
+//         where: { transaction_type: "Credit", transaction_title: "Service_Sales" },
+//         group: [literal("MONTH(transaction_date)")],
+//         raw: true
+//     });
+
+//     const expenseRows = await Transaction.findAll({
+//         attributes: [
+//             [literal("MONTH(transaction_date)"), "month"],
+//             [fn("SUM", col("amount_out")), "amount_out"]
+//         ],
+//         where: { transaction_type: "Debit" },
+//         group: [literal("MONTH(transaction_date)")],
+//         raw: true
+//     });
+
+//     const officeInvestment = Array(12).fill(0);
+//     const income = Array(12).fill(0);
+//     const expenses = Array(12).fill(0);
+//     const profit = Array(12).fill(0);
+
+//     investmentRows.forEach(row => {
+//         const idx = Number(row.month) - 1;
+//         officeInvestment[idx] = Number(
+//             (Number(row.amount_in || 0) + Number(row.return_amount || 0)).toFixed(2)
+//         );
+//     });
+
+//     incomeRows.forEach(row => {
+//         const idx = Number(row.month) - 1;
+//         const totalIncome = Number(row.amount_in || 0) + Number(row.return_amount || 0);
+//         income[idx] = Number(totalIncome.toFixed(2));
+//         profit[idx] = Number(totalIncome.toFixed(2));
+//     });
+
+//     expenseRows.forEach(row => {
+//         const idx = Number(row.month) - 1;
+//         expenses[idx] = Number(Number(row.amount_out || 0).toFixed(2));
+//     });
+
+//     return res.json({
+//         office_investment: officeInvestment,
+//         income,
+//         expenses,
+//         profit
+//     });
+// });
+
 router.get("/pcplus/api/accounts/monthly-chart", getCurrentActiveUser, async (req, res) => {
-    const investmentRows = await Transaction.findAll({
-        attributes: [
-            [literal("MONTH(transaction_date)"), "month"],
-            [fn("SUM", col("amount_in")), "amount_in"],
-            [fn("SUM", col("return_amount")), "return_amount"]
-        ],
-        where: { transaction_type: "Office_Investment" },
-        group: [literal("MONTH(transaction_date)")],
-        raw: true
-    });
+    try {
+        const officeInvestment = Array(12).fill(0);
+        const income = Array(12).fill(0);
+        const expenses = Array(12).fill(0);
+        const profit = Array(12).fill(0);
 
-    const incomeRows = await Transaction.findAll({
-        attributes: [
-            [literal("MONTH(transaction_date)"), "month"],
-            [fn("SUM", col("amount_in")), "amount_in"],
-            [fn("SUM", col("return_amount")), "return_amount"]
-        ],
-        where: { transaction_type: "Service_Sales" },
-        group: [literal("MONTH(transaction_date)")],
-        raw: true
-    });
+        const transactions = await Transaction.findAll({
+            attributes: [
+                "id",
+                "transaction_date",
+                "transaction_type",
+                "transaction_title",
+                "amount_in",
+                "amount_out",
+                "return_amount",
+            ],
+            raw: true,
+        });
 
-    const expenseRows = await Transaction.findAll({
-        attributes: [
-            [literal("MONTH(transaction_date)"), "month"],
-            [fn("SUM", col("amount_out")), "amount_out"]
-        ],
-        group: [literal("MONTH(transaction_date)")],
-        raw: true
-    });
+        transactions.forEach((row) => {
+            if (!row.transaction_date) return;
 
-    const officeInvestment = Array(12).fill(0);
-    const income = Array(12).fill(0);
-    const expenses = Array(12).fill(0);
-    const profit = Array(12).fill(0);
+            const monthIndex = new Date(row.transaction_date).getMonth();
 
-    investmentRows.forEach(row => {
-        const idx = Number(row.month) - 1;
-        officeInvestment[idx] = Number(
-            (Number(row.amount_in || 0) + Number(row.return_amount || 0)).toFixed(2)
-        );
-    });
+            const amountIn = Number(row.amount_in || 0);
+            const amountOut = Number(row.amount_out || 0);
+            const returnAmount = Number(row.return_amount || 0);
 
-    incomeRows.forEach(row => {
-        const idx = Number(row.month) - 1;
-        const totalIncome = Number(row.amount_in || 0) + Number(row.return_amount || 0);
-        income[idx] = Number(totalIncome.toFixed(2));
-        profit[idx] = Number(totalIncome.toFixed(2));
-    });
+            if (row.transaction_type === "Credit") {
+                if (row.transaction_title === "Office_Investment") {
+                    officeInvestment[monthIndex] += amountIn + returnAmount;
+                }
 
-    expenseRows.forEach(row => {
-        const idx = Number(row.month) - 1;
-        expenses[idx] = Number(Number(row.amount_out || 0).toFixed(2));
-    });
+                if (row.transaction_title === "Service_Sales") {
+                    income[monthIndex] += amountIn + returnAmount;
+                }
+            }
 
-    return res.json({
-        office_investment: officeInvestment,
-        income,
-        expenses,
-        profit
-    });
+            if (row.transaction_type === "Debit") {
+                expenses[monthIndex] += amountOut;
+            }
+        });
+
+        const paidDues = await Due.findAll({
+            attributes: [
+                "id",
+                "transaction_id",
+                "due_type",
+                "paid_amount",
+                "updated_at",
+            ],
+            where: {
+                paid_amount: {
+                    [Op.gt]: 0,
+                },
+            },
+            raw: true,
+        });
+
+        const transactionIds = paidDues
+            .map((item) => item.transaction_id)
+            .filter((id) => id !== null && id !== undefined);
+
+        const relatedTransactions = await Transaction.findAll({
+            attributes: ["id", "transaction_title", "transaction_type"],
+            where: {
+                id: {
+                    [Op.in]: transactionIds.length > 0 ? transactionIds : [0],
+                },
+            },
+            raw: true,
+        });
+
+        const transactionMap = {};
+
+        relatedTransactions.forEach((item) => {
+            transactionMap[item.id] = item;
+        });
+
+        paidDues.forEach((row) => {
+            if (!row.updated_at) return;
+
+            const monthIndex = new Date(row.updated_at).getMonth();
+            const paidAmount = Number(row.paid_amount || 0);
+            const relatedTransaction = transactionMap[row.transaction_id];
+
+            if (row.due_type === "Credit") {
+                if (relatedTransaction?.transaction_title === "Office_Investment") {
+                    officeInvestment[monthIndex] += paidAmount;
+                } else {
+                    income[monthIndex] += paidAmount;
+                }
+            }
+
+            if (row.due_type === "Debit") {
+                expenses[monthIndex] += paidAmount;
+            }
+        });
+
+        for (let i = 0; i < 12; i++) {
+            officeInvestment[i] = Number(officeInvestment[i].toFixed(2));
+            income[i] = Number(income[i].toFixed(2));
+            expenses[i] = Number(expenses[i].toFixed(2));
+            profit[i] = Number((income[i] - expenses[i]).toFixed(2));
+        }
+
+        return res.json({
+            office_investment: officeInvestment,
+            income,
+            expenses,
+            profit,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            detail: error.message,
+        });
+    }
 });
 
 router.get("/pcplus/api/accounts/cost-pie-chart", getCurrentActiveUser, async (req, res) => {
@@ -335,8 +493,23 @@ router.get("/pcplus/api/accounts/cost-pie-chart", getCurrentActiveUser, async (r
 
     const todayStr = formatDate(today);
 
+
+
+    // Saturday start
+    const daysSinceSaturday = (today.getDay() + 1) % 7;
+
     const startThisWeek = new Date(today);
-    startThisWeek.setDate(today.getDate() - today.getDay() + 1);
+    startThisWeek.setDate(today.getDate() - daysSinceSaturday);
+    startThisWeek.setHours(0, 0, 0, 0);
+
+    const endThisWeek = new Date(startThisWeek);
+    endThisWeek.setDate(startThisWeek.getDate() + 6);
+    endThisWeek.setHours(23, 59, 59, 999);
+
+
+
+    
+
 
     const startThisMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
@@ -354,11 +527,14 @@ router.get("/pcplus/api/accounts/cost-pie-chart", getCurrentActiveUser, async (r
         transaction_date: todayStr
     });
 
+
+
     const this_week = await sumAmountOut({
         transaction_date: {
-            [Op.between]: [formatDate(startThisWeek), todayStr]
+            [Op.between]: [formatDate(startThisWeek), formatDate(endThisWeek)]
         }
     });
+
 
     const this_month = await sumAmountOut({
         transaction_date: {

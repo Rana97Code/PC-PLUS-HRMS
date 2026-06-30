@@ -18,6 +18,11 @@ const Transaction = lazy(() => import('../pages/Accounts/Transaction/index'));
 const TransactionAdd = lazy(() => import('../pages/Accounts/Transaction/components/AddTransaction'));
 const TransactionInvoice = lazy(() => import('../pages/Invoice/AccountsInvoice/TransactionInvoice'));
 
+const Due = lazy(() => import('../pages/Accounts/Due/index'));
+const DuePay = lazy(() => import('../pages/Accounts/Due/payDue/PayDue'));
+const DueInvoice = lazy(() => import('../pages/Invoice/AccountsInvoice/DueInvoice'));
+
+
 const Items = lazy(() => import('../pages/Inventory/Items/index'));
 const ItemsAdd = lazy(() => import('../pages/Inventory/Items/AddItems'));
 const ItemsEdit = lazy(() => import('../pages/Inventory/Items/EditItems'));
@@ -248,6 +253,19 @@ const routes = [
     {
         path: '/pages/accounts/transaction/invoice/:id',
         element: <TransactionInvoice />,
+    },
+
+    {
+        path: '/pages/accounts/due',
+        element: <Due />,
+    },
+    {
+        path: '/pages/accounts/due/payment/:source_type/:source_id/:due_type',
+        element: <DuePay />,
+    },
+    {
+        path: '/pages/accounts/due/invoice/:source_type/:source_id/:due_type',
+        element: <DueInvoice />,
     },
     {
         path: '/pages/inventory/items',

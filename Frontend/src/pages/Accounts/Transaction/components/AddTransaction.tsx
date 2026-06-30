@@ -21,6 +21,7 @@ const AddTransaction: React.FC = () => {
     const emptyForm = {
         transaction_date: getTodayDate(),
         transaction_type: '',
+        transaction_title: '',
         transaction_by: '',
         transaction_to: '',
         amount_in: '',
@@ -54,12 +55,41 @@ const AddTransaction: React.FC = () => {
     const [form, setForm] = useState<any>(emptyForm);
     const [transactionList, setTransactionList] = useState<any[]>([]);
     const [transactionMode, setTransactionMode] = useState('');
+    const [editIndex, setEditIndex] = useState<number | null>(null);
+
+    const calculateDebitAmount = (updatedForm: any) => {
+        if (transactionMode !== 'Debit') {
+            return updatedForm;
+        }
+
+        const debitAmount = Number(updatedForm.amount_out || 0);
+        const costAmount = Number(updatedForm.cost || 0);
+
+        if (costAmount < debitAmount) {
+            updatedForm.return_amount = debitAmount - costAmount;
+            updatedForm.due_amount = 0;
+        } else if (costAmount > debitAmount) {
+            updatedForm.due_amount = costAmount - debitAmount;
+            updatedForm.return_amount = 0;
+        } else {
+            updatedForm.due_amount = 0;
+            updatedForm.return_amount = 0;
+        }
+
+        return updatedForm;
+    };
 
     const handleChange = (field: string, value: any) => {
-        setForm({
+        let updatedForm = {
             ...form,
             [field]: value,
-        });
+        };
+
+        if (transactionMode === 'Debit' && (field === 'amount_out' || field === 'cost')) {
+            updatedForm = calculateDebitAmount(updatedForm);
+        }
+
+        setForm(updatedForm);
     };
 
     const handleTransactionModeChange = (value: string) => {
@@ -67,20 +97,23 @@ const AddTransaction: React.FC = () => {
 
         setForm({
             ...form,
-            transaction_type: '',
-            amount_in: value === 'Debit' ? 0 : form.amount_in,
-            amount_out: value === 'Credit' ? 0 : form.amount_out,
+            transaction_type: value,
+            amount_in: value === 'Credit' ? 0 : '',
+            amount_out: value === 'Debit' ? 0 : '',
+            cost: '',
+            due_amount: '',
+            return_amount: '',
         });
     };
 
-    const addTransactionRow = () => {
+    const addOrUpdateTransactionRow = () => {
         if (!transactionMode) {
             alert('Please select Debit/Credit');
             return;
         }
 
-        if (!form.transaction_type) {
-            alert('Please select transaction type');
+        if (!form.transaction_title) {
+            alert('Please select transaction title');
             return;
         }
 
@@ -94,14 +127,50 @@ const AddTransaction: React.FC = () => {
             created_by: user?.email || 'office@email.com',
         };
 
-        setTransactionList([...transactionList, transaction]);
+        if (editIndex !== null) {
+            const updatedList = [...transactionList];
+            updatedList[editIndex] = transaction;
+            setTransactionList(updatedList);
+            setEditIndex(null);
+        } else {
+            setTransactionList([...transactionList, transaction]);
+        }
+
         setForm(emptyForm);
         setTransactionMode('');
+    };
+
+    const editTransactionRow = (index: number) => {
+        const selected = transactionList[index];
+
+        setForm({
+            ...selected,
+            amount_in: selected.amount_in || '',
+            amount_out: selected.amount_out || '',
+            cost: selected.cost || '',
+            due_amount: selected.due_amount || '',
+            return_amount: selected.return_amount || '',
+        });
+
+        setTransactionMode(Number(selected.amount_in) > 0 ? 'Credit' : 'Debit');
+        setEditIndex(index);
     };
 
     const removeTransactionRow = (index: number) => {
         const updated = transactionList.filter((_, i) => i !== index);
         setTransactionList(updated);
+
+        if (editIndex === index) {
+            setEditIndex(null);
+            setForm(emptyForm);
+            setTransactionMode('');
+        }
+    };
+
+    const cancelEdit = () => {
+        setEditIndex(null);
+        setForm(emptyForm);
+        setTransactionMode('');
     };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -137,7 +206,9 @@ const AddTransaction: React.FC = () => {
             <div className="pt-5">
                 <div className="panel">
                     <div className="flex items-center justify-between mb-7">
-                        <h5 className="font-semibold text-lg dark:text-white-light">Add Multiple Transactions</h5>
+                        <h5 className="font-semibold text-lg dark:text-white-light">
+                            {editIndex !== null ? 'Edit Transaction' : 'Add Multiple Transactions'}
+                        </h5>
                     </div>
 
                     <form className="space-y-5" onSubmit={handleSubmit}>
@@ -156,9 +227,8 @@ const AddTransaction: React.FC = () => {
                                 <label>Debit/Credit</label>
                                 <select
                                     className="form-select text-dark"
-                                    value={transactionMode}
+                                    value={transactionMode || form.transaction_type}
                                     onChange={(e) => handleTransactionModeChange(e.target.value)}
-                                    
                                 >
                                     <option value="">Select Debit/Credit</option>
                                     <option value="Debit">Debit</option>
@@ -167,15 +237,14 @@ const AddTransaction: React.FC = () => {
                             </div>
 
                             <div>
-                                <label>Transaction Type</label>
+                                <label>Transaction Title</label>
                                 <select
                                     className="form-select text-dark"
-                                    value={form.transaction_type}
-                                    onChange={(e) => handleChange('transaction_type', e.target.value)}
+                                    value={form.transaction_title}
+                                    onChange={(e) => handleChange('transaction_title', e.target.value)}
                                     disabled={!transactionMode}
-                                    
                                 >
-                                    <option value="">Select Transaction Type</option>
+                                    <option value="">Select Transaction</option>
                                     {transactionTypes.map((type) => (
                                         <option key={type.value} value={type.value}>
                                             {type.label}
@@ -206,6 +275,8 @@ const AddTransaction: React.FC = () => {
                                 />
                             </div>
 
+
+
                             {transactionMode === 'Credit' && (
                                 <div>
                                     <label>Amount Credit</label>
@@ -233,7 +304,12 @@ const AddTransaction: React.FC = () => {
                             )}
 
                             <div>
-                                <label>Cost</label>
+                                {transactionMode === 'Debit' && (
+                                    <label>Cost</label>
+                                )}
+                                {transactionMode === 'Credit' && (
+                                    <label>Price</label>
+                                )}
                                 <input
                                     type="number"
                                     step="0.01"
@@ -242,6 +318,7 @@ const AddTransaction: React.FC = () => {
                                     onChange={(e) => handleChange('cost', e.target.value)}
                                 />
                             </div>
+
 
                             <div>
                                 <label>Due Amount</label>
@@ -253,7 +330,7 @@ const AddTransaction: React.FC = () => {
                                     onChange={(e) => handleChange('due_amount', e.target.value)}
                                 />
                             </div>
-
+                                {transactionMode === 'Debit' && (
                             <div>
                                 <label>Return Amount</label>
                                 <input
@@ -264,6 +341,7 @@ const AddTransaction: React.FC = () => {
                                     onChange={(e) => handleChange('return_amount', e.target.value)}
                                 />
                             </div>
+                                )}
 
                             <div className="md:col-span-3">
                                 <label className="text-sm">Note</label>
@@ -276,9 +354,15 @@ const AddTransaction: React.FC = () => {
                             </div>
                         </div>
 
-                        <div className="flex justify-end">
-                            <button type="button" className="btn btn-primary" onClick={addTransactionRow}>
-                                Add Transaction
+                        <div className="flex justify-end gap-3">
+                            {editIndex !== null && (
+                                <button type="button" className="btn btn-secondary" onClick={cancelEdit}>
+                                    Cancel Edit
+                                </button>
+                            )}
+
+                            <button type="button" className="btn btn-primary" onClick={addOrUpdateTransactionRow}>
+                                {editIndex !== null ? 'Update Transaction' : 'Add Transaction'}
                             </button>
                         </div>
 
@@ -314,13 +398,23 @@ const AddTransaction: React.FC = () => {
                                             <td>{item.due_amount}</td>
                                             <td>{item.return_amount}</td>
                                             <td>
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-danger btn-sm"
-                                                    onClick={() => removeTransactionRow(index)}
-                                                >
-                                                    Remove
-                                                </button>
+                                                <div className="flex gap-2">
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-warning btn-sm"
+                                                        onClick={() => editTransactionRow(index)}
+                                                    >
+                                                        Edit
+                                                    </button>
+
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-danger btn-sm"
+                                                        onClick={() => removeTransactionRow(index)}
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

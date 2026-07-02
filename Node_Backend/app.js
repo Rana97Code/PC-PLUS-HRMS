@@ -6,12 +6,16 @@ require("dotenv").config();
 const sequelize = require("./config/db");
 
 // Import models so Sequelize knows them
-require("./models/User");
+require("./models/auth/User");
 require("./models/Transaction");
 require("./models/Balance");
 require("./models/Due");
+require("./models/auth/Role");
+require("./models/auth/Permission");
+require("./models/auth/RolePermission");
 
 const authController = require("./controllers/authController");
+const rolePermissionController = require("./controllers/rolePermissionController");
 const userController = require("./controllers/userController");
 const transactionController = require("./controllers/transactionController");
 const dueController = require("./controllers/dueController");
@@ -52,6 +56,7 @@ app.get("/", (req, res) => {
 });
 
 app.use(authController);
+app.use(rolePermissionController);
 app.use(userController);
 app.use(transactionController);
 app.use(dueController);

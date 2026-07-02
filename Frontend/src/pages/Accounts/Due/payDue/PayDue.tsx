@@ -1,14 +1,16 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
-import UserContex from '../../../../context/UserContex';
+import { useSelector } from 'react-redux';
+import { IRootState } from '../../../../store';
 
 const PayDue = () => {
     const navigate = useNavigate();
     const { source_type, source_id, due_type } = useParams();
 
-    const user = useContext(UserContex);
-    const baseUrl = user.base_url;
+    const auth = useSelector((state: IRootState) => state.auth);
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
+    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
 
     const today = new Date().toISOString().slice(0, 10);
 
@@ -19,7 +21,7 @@ const PayDue = () => {
         due_date: today,
         paid_amount: '',
         note: '',
-        created_by: user.email,
+        created_by: auth.user?.user_email || '',
     });
 
     const totalDue = Number(selectedData?.remaining_due || selectedData?.due_amount || 0);
@@ -36,7 +38,7 @@ const PayDue = () => {
 
             const res = await axios.get(
                 `${baseUrl}/due/payment-invoice/${source_type}/${source_id}/${due_type}`,
-                { headers: user.headers }
+                { headers }
             );
 
             setSelectedData(res.data);
@@ -88,7 +90,7 @@ const PayDue = () => {
                     created_by: form.created_by,
                     due_date: form.due_date,
                 },
-                { headers: user.headers }
+                { headers }
             );
 
             navigate('/pages/accounts/due');

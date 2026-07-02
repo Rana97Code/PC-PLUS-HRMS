@@ -1,18 +1,19 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import IconFile from '../../../../components/Icon/IconFile';
 import IconTrashLines from '../../../../components/Icon/IconTrashLines';
 import IconArrowBackward from '../../../../components/Icon/IconArrowBackward';
-import UserContext from '../../../../context/UserContex';
+import { useSelector } from 'react-redux';
+import { IRootState } from '../../../../store';
 
 const AddTransaction: React.FC = () => {
     const navigate = useNavigate();
-    const user = useContext(UserContext);
+    const auth = useSelector((state: IRootState) => state.auth);
 
-    const headers = user.headers;
-    const baseUrl = user.base_url;
-
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
+    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
+    
     const getTodayDate = () => {
         const today = new Date();
         return today.toISOString().split('T')[0];
@@ -30,7 +31,7 @@ const AddTransaction: React.FC = () => {
         due_amount: '',
         return_amount: '',
         transaction_notes: '',
-        created_by: user?.email || 'office@email.com',
+        created_by: auth.user?.user_email || 'office@email.com',
     };
 
     const debitTransactionTypes = [
@@ -124,7 +125,7 @@ const AddTransaction: React.FC = () => {
             cost: Number(form.cost || 0),
             due_amount: Number(form.due_amount || 0),
             return_amount: Number(form.return_amount || 0),
-            created_by: user?.email || 'office@email.com',
+            created_by: auth.user?.user_email || 'office@email.com',
         };
 
         if (editIndex !== null) {

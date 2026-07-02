@@ -20,16 +20,17 @@ import IconBolt from '../components/Icon/IconBolt';
 import IconCaretDown from '../components/Icon/IconCaretDown';
 import IconPlus from '../components/Icon/IconPlus';
 import IconMultipleForwardRight from '../components/Icon/IconMultipleForwardRight';
-import UserContext from '../context/UserContex';
 import axios from 'axios';
 
 
 const Index = () => {
-    const user = useContext(UserContext);
-    const headers = user.headers;
-    const baseUrl = user.base_url;
+
 
     const dispatch = useDispatch();
+
+    const auth = useSelector((state: IRootState) => state.auth);
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
+    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
 
     const isDark = useSelector((state: IRootState) => state.themeConfig.theme === 'dark' || state.themeConfig.isDarkMode);
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl';

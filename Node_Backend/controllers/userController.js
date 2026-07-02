@@ -1,7 +1,7 @@
 const express = require("express");
 const path = require("path");
 const multer = require("multer");
-const User = require("../models/User");
+const User = require("../models/auth/User");
 const { getCurrentActiveUser } = require("../middleware/authMiddleware");
 
 const router = express.Router();

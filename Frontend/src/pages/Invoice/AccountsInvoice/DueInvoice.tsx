@@ -1,12 +1,14 @@
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import axios from 'axios';
-import UserContex from '../../../context/UserContex';
+import { useSelector } from 'react-redux';
+import { IRootState } from '../../../store';
 
 const DueInvoice = () => {
     const { source_type, source_id, due_type } = useParams();
-    const user = useContext(UserContex);
-    const baseUrl = user.base_url;
+    const auth = useSelector((state: IRootState) => state.auth);
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
+    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
 
     const printRef = useRef<HTMLDivElement>(null);
 
@@ -19,7 +21,7 @@ const DueInvoice = () => {
 
             const res = await axios.get(
                 `${baseUrl}/due/invoice/${source_type}/${source_id}/${due_type}`,
-                { headers: user.headers }
+                { headers }
             );
 
             setInvoice(res.data);

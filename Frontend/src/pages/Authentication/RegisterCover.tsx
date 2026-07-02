@@ -15,11 +15,9 @@ import IconInstagram from '../../components/Icon/IconInstagram';
 import IconFacebookCircle from '../../components/Icon/IconFacebookCircle';
 import IconTwitter from '../../components/Icon/IconTwitter';
 import IconGoogle from '../../components/Icon/IconGoogle';
-import UserContex from '../../context/UserContex';
 
 const RegisterCover = () => {
-    const user = useContext(UserContex);
-    const baseUrl = user.base_url;
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -59,44 +57,35 @@ const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
 
     try {
         setError('');
+        setTokenError('');
+        setLoading(true);
 
-        const response = await axios.post(
-            `${baseUrl}/create_user`,
-            {
-                user_name: name,
-                user_phone: phone,
-                user_email: email,
-                user_password: password,
-                office_token: officeToken,
-            }
-        );
+        await axios.post(`${baseUrl}/create_user`, {
+            user_name: name,
+            user_phone: phone,
+            user_email: email,
+            user_password: password,
+            office_token: officeToken,
+        });
 
-        localStorage.setItem(
-            'Token',
-            JSON.stringify(response.data.access_token || response.data)
-        );
+        setSuccess('Registration successful. Please login now.');
 
-        navigate('/index');
+        setTimeout(() => {
+            navigate('/login', { replace: true });
+        }, 1000);
 
     } catch (err: any) {
-
         if (err.response?.status === 403) {
             setError('Your office verification token is invalid.');
             setTokenError('Your office verification token is invalid.');
-
-        } 
-        else if (err.response?.status === 400) {
-            setError(err.response.data.detail);
-
-        } 
-        else {
+        } else if (err.response?.status === 400) {
+            setError(err.response?.data?.detail || 'Registration failed.');
+        } else {
             setError('Registration failed. Please try again.');
             setTokenError('');
-
         }
-
-        console.error(err);
-
+    } finally {
+        setLoading(false);
     }
 };
 

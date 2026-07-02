@@ -123,25 +123,31 @@ const Sidebar = () => {
                             </li>
 
 
-                                                        {/*----------- Relationship -----------*/}
+                            {/* ----------- User Settings ----------- */}
                             <li className="menu nav-item">
-                                <button type="button" className={`${currentMenu === 'Relationship' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('Relationship')}>
+                                <button type="button" className={`${currentMenu === 'Settings' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('Settings')}>
                                     <div className="flex items-center">
                                         <IconMenuUsers className="group-hover:!text-primary shrink-0" />
-                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('Relationship')}</span>
+                                        <span className="ltr:pl-3 rtl:pr-3 text-black dark:text-[#506690] dark:group-hover:text-white-dark">{t('User Settings')}</span>
                                     </div>
 
-                                    <div className={currentMenu !== 'Relationship' ? 'rtl:rotate-90 -rotate-90' : ''}>
+                                    <div className={currentMenu !== 'Settings' ? 'rtl:rotate-90 -rotate-90' : ''}>
                                         <IconCaretDown />
                                     </div>
                                 </button>
-                                <AnimateHeight duration={300} height={currentMenu === 'Relationship' ? 'auto' : 0}>
+                                <AnimateHeight duration={300} height={currentMenu === 'Settings' ? 'auto' : 0}>
                                     <ul className="sub-menu text-gray-500">
                                         <li>
-                                            <NavLink to="/pages/relationship/customers">{t('Customers')}</NavLink>
+                                            <NavLink to="/pages/settings/user-roles">{t('User Roles')}</NavLink>
                                         </li>
                                         <li>
-                                            <NavLink to="/pages/relationship/suppliers">{t('Suppliers')}</NavLink>
+                                            <NavLink to="/pages/settings/roles">{t('Roles')}</NavLink>
+                                        </li>
+                                        <li>
+                                            <NavLink to="/pages/settings/permissions">{t('Permissions')}</NavLink>
+                                        </li>
+                                        <li>
+                                            <NavLink to="/pages/settings/role-permissions">{t('Role Permissions')}</NavLink>
                                         </li>
                                     </ul>
                                 </AnimateHeight>
@@ -149,7 +155,7 @@ const Sidebar = () => {
 
 
                             {/*----------- Inventory -----------*/}
-                            <li className="menu nav-item">
+                            {/* <li className="menu nav-item">
                                 <button type="button" className={`${currentMenu === 'Inventory' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('Inventory')}>
                                     <div className="flex items-center">
                                         <IconMenuComponents className="group-hover:!text-primary shrink-0" />
@@ -168,9 +174,9 @@ const Sidebar = () => {
                                     </ul>
                                 </AnimateHeight>
                             </li>
-
+*/}
                             {/*----------- Production -----------*/}
-                            <li className="menu nav-item">
+                           {/* <li className="menu nav-item">
                                 <button type="button" className={`${currentMenu === 'Production' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('Production')}>
                                     <div className="flex items-center">
                                         <IconMenuScrumboard className="group-hover:!text-primary shrink-0" />
@@ -221,9 +227,9 @@ const Sidebar = () => {
                                     </ul>
                                 </AnimateHeight>
                             </li>
-
+                                */}
                             {/*----------- Sales -----------*/}
-                            <li className="menu nav-item">
+                            {/* <li className="menu nav-item">
                                 <button type="button" className={`${currentMenu === 'Sales' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('Sales')}>
                                     <div className="flex items-center">
 
@@ -265,9 +271,9 @@ const Sidebar = () => {
                                     </ul>
                                 </AnimateHeight>
                             </li>
-
+                                */}
                             {/*----------- Report -----------*/}
-                            <li className="menu nav-item">
+                            {/* <li className="menu nav-item">
                                 <button type="button" className={`${currentMenu === 'Report' ? 'active' : ''} nav-link group w-full`} onClick={() => toggleMenu('Report')}>
                                     <div className="flex items-center">
                                         <IconMenuForms className="group-hover:!text-primary shrink-0" />
@@ -315,7 +321,7 @@ const Sidebar = () => {
                                         </li>
                                     </ul>
                                 </AnimateHeight>
-                            </li>
+                            </li> */}
 
                             {/*----------- General Settings -----------*/}
                             <li className="menu nav-item">

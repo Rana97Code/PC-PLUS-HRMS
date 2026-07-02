@@ -1,20 +1,21 @@
-import React, { useEffect, useMemo, useState, useContext, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { NavLink } from 'react-router-dom';
 import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import sortBy from 'lodash/sortBy';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { setPageTitle } from '../../../store/themeConfigSlice';
 import axios from 'axios';
-import UserContext from '../../../context/UserContex';
 import { useReactToPrint } from 'react-to-print';
+import { IRootState } from '../../../store';
 
 const AccountsSummary = () => {
     const dispatch = useDispatch();
-    const user = useContext(UserContext);
 
-    const headers = user.headers;
-    const baseUrl = user.base_url;
-    const token = user.token;
+
+    const auth = useSelector((state: IRootState) => state.auth);
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
+    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
+    const authToken = auth.token;
 
     const PAGE_SIZES = [10, 20, 30, 50, 100];
 
@@ -40,7 +41,7 @@ const AccountsSummary = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        if (token) {
+        if (authToken) {
             axios.get(`${baseUrl}/accounts/latest-balance`, { headers })
                 .then((response) => setBalance(response.data || {}))
                 .catch((error) => console.error('Error fetching balance:', error));
@@ -49,7 +50,7 @@ const AccountsSummary = () => {
                 .then((response) => setInvestors(response.data || []))
                 .catch((error) => console.error('Error fetching investor contribution:', error));
         }
-    }, [token, baseUrl]);
+    }, [authToken, baseUrl]);
 
     const filteredInvestors = useMemo(() => {
         const query = search.toLowerCase();

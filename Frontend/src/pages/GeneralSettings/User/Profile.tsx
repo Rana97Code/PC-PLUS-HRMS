@@ -1,17 +1,17 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useEffect, useState, useContext } from 'react';
+import { useSelector } from 'react-redux';
+import { IRootState } from '../../../store';
+
+import { useEffect, useState } from 'react';
 import IconMail from '../../../components/Icon/IconMail';
 import IconPhone from '../../../components/Icon/IconPhone';
 import IconFile from '../../../components/Icon/IconFile';
 import IconTrashLines from '../../../components/Icon/IconTrashLines';
 import axios from 'axios';
-import UserContex from '../../../context/UserContex';
 
 const Profile = () => {
-    const user = useContext(UserContex);
-    const baseUrl = user.base_url;
-    const imageUrl = user.image_url;
-    const headers = user.headers;
+
+
     const navigate = useNavigate();
 
     const [userId, setUserId] = useState<number | null>(null);
@@ -23,9 +23,12 @@ const Profile = () => {
     const [profileFile, setProfileFile] = useState<File | null>(null);
     const [previewImage, setPreviewImage] = useState('');
 
+    const auth = useSelector((state: IRootState) => state.auth);
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
+    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
 
     useEffect(() => {
-        if (!user?.token) {
+        if (!auth?.token) {
             navigate('/');
             return;
         }
@@ -35,7 +38,7 @@ const Profile = () => {
 
     const getUserDetails = async () => {
         try {
-            const response = await axios.get(`${baseUrl}/get_me/${user?.email}`, { headers });
+            const response = await axios.get(`${baseUrl}/get_me/${auth.user?.user_email}`, { headers });
             const data = response.data;
 
             setUserId(data.id);
@@ -46,7 +49,7 @@ const Profile = () => {
             setUserImg(data.user_img || '');
 
             if (data.user_img) {
-                setPreviewImage(`${imageUrl}/${data.user_img}`);
+                setPreviewImage(`${import.meta.env.VITE_APP_API_IMAGE_URL}/${data.user_img}`);
             } else {
                 setPreviewImage(`/assets/images/users/profile.png`);
             }

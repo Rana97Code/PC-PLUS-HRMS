@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import {  useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, NavLink, useLocation , useNavigate} from 'react-router-dom';
 import { IRootState } from '../../store';
@@ -20,23 +20,23 @@ import IconMenuForms from '../Icon/Menu/IconMenuForms';
 import IconMenuPages from '../Icon/Menu/IconMenuPages';
 import IconMenuMore from '../Icon/Menu/IconMenuMore';
 import { jwtDecode } from "jwt-decode";
+import { logout } from '../../store/authSlice';
 
-import UserContex from '../../context/UserContex';
-import axios from 'axios';
 
 const Header = () => {
-    const [username,setName]=useState("");
-    const [userprofile,setProfile]=useState("");
+
 
     const location = useLocation();
     const navigate = useNavigate();
-    const user = useContext(UserContex);
-    const baseUrl = user.base_url;
-    const imageUrl = user.image_url;
-    const headers = user.headers;
+
+    const auth = useSelector((state: IRootState) => state.auth);
+
+    const username = auth.user?.user_email || '';
+    const userprofile = auth.user?.user_image
+        ? `${import.meta.env.VITE_IMAGE_BASE_URL}/${auth.user.user_image}`
+        : '/assets/images/users/profile.png';
 
 
-    var profile = "";
 
 
     useEffect(() => {
@@ -58,26 +58,10 @@ const Header = () => {
                 }
             }
         }
-        getUserDetails();
-
-
 
     }, [location]);
 
-        const getUserDetails = async () => {
-        try {
-            const response = await axios.get(`${baseUrl}/get_me/${user?.email}`, { headers });
-            const data = response.data;
-            setName(data.user_email);
-            if (data.user_img) {
-                setProfile(`${imageUrl}/${data.user_img}`);
-            } else {
-                setProfile(`/assets/images/users/profile.png`);
-            }
-        } catch (error) {
-            console.error('Error fetching user details:', error);
-        }
-    };
+
 
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl' ? true : false;
 
@@ -98,10 +82,10 @@ const Header = () => {
 
     const { t } = useTranslation();
 
-    const logout=()=>{
-        localStorage.clear();
-        navigate("/");
-        }
+    const handleLogout = () => {
+        dispatch(logout());
+        navigate('/login', { replace: true });
+    };
 
 
 
@@ -178,7 +162,7 @@ const Header = () => {
                                         </Link>
                                     </li>
                                     <li className="border-t border-white-light dark:border-white-light/10">
-                                        <button onClick={logout} className="text-danger !py-3">
+                                        <button onClick={handleLogout} className="text-danger !py-3">
                                             <IconLogout className="w-4.5 h-4.5 ltr:mr-2 rtl:ml-2 rotate-90 shrink-0" />
                                             Sign Out
                                         </button>

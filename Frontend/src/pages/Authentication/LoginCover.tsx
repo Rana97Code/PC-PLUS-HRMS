@@ -1,64 +1,70 @@
-import React, { useContext, useState, useEffect } from 'react';
-import { Link,NavLink, useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+
 import { IRootState } from '../../store';
+import { loginSuccess } from '../../store/authSlice';
+
 import IconMail from '../../components/Icon/IconMail';
 import IconLockDots from '../../components/Icon/IconLockDots';
 import IconUser from '../../components/Icon/IconUser';
-import axios from 'axios';
-import UserContex from '../../context/UserContex';
-import Swal from 'sweetalert2';
 
 const LoginCover = () => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const user = useContext(UserContex);
-    const baseUrl = user.base_url;
+    const { user } = useSelector((state: IRootState) => state.auth);
 
-    const [username, setUser] = useState("")
-    const [password, setPassword] = useState("")
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
+
+    const [username, setUser] = useState('');
+    const [password, setPassword] = useState('');
 
     useEffect(() => {
-        if (user?.email) {
-            navigate('/index');
+        if (user?.id) {
+            navigate('/index', { replace: true });
         }
-    }, [user?.email, navigate]);
+    }, [user?.id, navigate]);
 
-const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
 
-    try {
-        const formData = new FormData();
-        formData.append('username', username);
-        formData.append('password', password);
+        try {
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('password', password);
 
-        const response = await axios.post(`${baseUrl}/auth`, formData);
+            const response = await axios.post(`${baseUrl}/auth`, formData);
 
-        if (response?.data?.access_token) {
-            localStorage.setItem('Token', JSON.stringify(response.data.access_token));
-            navigate('/index');
-        } else {
+            if (response?.data?.access_token && response?.data?.user) {
+                dispatch(
+                    loginSuccess({
+                        token: response.data.access_token,
+                        user: response.data.user,
+                        role_key: response.data.user.role_key,
+                        permissions: response.data.user.permissions || [],
+                    })
+                );
+
+                navigate('/index');
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Login Failed',
+                    text: 'Enter a valid user email and password',
+                });
+            }
+        } catch (error: any) {
             Swal.fire({
                 icon: 'error',
                 title: 'Login Failed',
-                text: 'Enter a valid user email and password',
+                text: error.response?.data?.detail || 'Enter a valid User Email & Password',
             });
         }
-    } catch (error: any) {
-        if (error.response?.status === 401 || error.response?.status === 403 || error.response?.status === 400) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Login Failed',
-                text: 'Enter a valid User Email & Password',
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: 'Something went wrong',
-                text: 'Please try again later',
-            });
-        }
-    }
-};
+    };
+
 
 
     return (
@@ -94,7 +100,7 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
                                     <label htmlFor="userName">User Email</label>
                                     <div className="relative text-white-dark">
                                         <input id="UserName" type="text"
-                                            placeholder="Enter Username"
+                                            placeholder="Enter User Email"
                                             className="form-input ps-10 placeholder:text-white-dark"
                                             onChange={e => setUser(e.target.value)} required
                                         />

@@ -6,14 +6,14 @@ import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../../store/themeConfigSlice';
 import IconPlus from '../../../components/Icon/IconPlus';
 import axios from 'axios';
-import UserContext from '../../../context/UserContex';
+import { useSelector } from 'react-redux';
+import { IRootState } from '../../../store';
 
 const TransactionIndex = () => {
     const dispatch = useDispatch();
-    const user = useContext(UserContext);
-    const headers = user.headers;
-    const baseUrl = user.base_url;
-    const token = user.token;
+    const auth = useSelector((state: IRootState) => state.auth);
+    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
 
     const PAGE_SIZES = [10, 20, 30, 50, 100];
 
@@ -32,7 +32,7 @@ const TransactionIndex = () => {
     }, [dispatch]);
 
     useEffect(() => {
-        if (token) {
+        if (auth.token) {
 
             axios
                 .get(`${baseUrl}/transaction/all_transaction`, { headers })
@@ -43,7 +43,7 @@ const TransactionIndex = () => {
                     console.error('Error fetching transactions:', error);
                 });
         }
-    }, []);
+    }, [auth.token]);
 
     const filteredRecords = useMemo(() => {
         const query = search.toLowerCase();

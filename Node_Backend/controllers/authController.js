@@ -1,18 +1,41 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
 const multer = require("multer");
-const upload = multer();
 
+const { User, Role, Permission } = require("../models/auth");
+
+
+const upload = multer();
 const router = express.Router();
 
-const createToken = (user_email) => {
+const createToken = (user) => {
     return jwt.sign(
-        { user_email },
+        {
+            id: user.id,
+            user_email: user.user_email,
+            user_role: user.user_role,
+            role_key: user.Role?.role_key || null
+        },
         process.env.JWT_SECRET,
         { expiresIn: "200m" }
     );
+};
+
+const formatUserResponse = (user) => {
+    const permissions = user.Role?.Permissions?.map((p) => p.permission_key) || [];
+
+    return {
+        id: user.id,
+        user_name: user.user_name,
+        user_phone: user.user_phone,
+        user_email: user.user_email,
+        user_img: user.user_img,
+        user_role: user.user_role,
+        role_name: user.Role?.role_name || null,
+        role_key: user.Role?.role_key || null,
+        permissions
+    };
 };
 
 router.post("/pcplus/api/create_user", async (req, res) => {
@@ -31,9 +54,7 @@ router.post("/pcplus/api/create_user", async (req, res) => {
             });
         }
 
-        const existingUser = await User.findOne({
-            where: { user_email }
-        });
+        const existingUser = await User.findOne({ where: { user_email } });
 
         if (existingUser) {
             return res.status(400).json({
@@ -42,51 +63,37 @@ router.post("/pcplus/api/create_user", async (req, res) => {
         }
 
         const hashedPassword = await bcrypt.hash(user_password, 10);
-
         const newUser = await User.create({
             user_name,
             user_phone,
             user_email,
             user_password: hashedPassword,
-            confirm_password: hashedPassword
+            confirm_password: hashedPassword,
+            user_role: 2
         });
 
-        const access_token = createToken(newUser.user_email);
-
         return res.json({
-            access_token,
-            token_type: "bearer",
+            message: "User created successfully",
             user_email: newUser.user_email
         });
 
     } catch (error) {
-        return res.status(400).json({
-            detail: error.message
-        });
+        return res.status(400).json({ detail: error.message });
     }
 });
 
 router.post("/pcplus/api/auth", upload.none(), async (req, res) => {
     try {
         const body = req.body || {};
-        const query = req.query || {};
-
-        // console.log("AUTH BODY:", body);
-        // console.log("AUTH QUERY:", query);
 
         const user_email =
             body.username ||
             body.user_email ||
-            body.email ||
-            query.username ||
-            query.user_email ||
-            query.email;
+            body.email;
 
         const user_password =
             body.password ||
-            body.user_password ||
-            query.password ||
-            query.user_password;
+            body.user_password;
 
         if (!user_email || !user_password) {
             return res.status(400).json({
@@ -95,7 +102,13 @@ router.post("/pcplus/api/auth", upload.none(), async (req, res) => {
         }
 
         const user = await User.findOne({
-            where: { user_email }
+            where: { user_email },
+            include: [
+                {
+                    model: Role,
+                    include: [Permission]
+                }
+            ]
         });
 
         if (!user) {
@@ -104,10 +117,7 @@ router.post("/pcplus/api/auth", upload.none(), async (req, res) => {
             });
         }
 
-        const validPassword = await bcrypt.compare(
-            user_password,
-            user.user_password
-        );
+        const validPassword = await bcrypt.compare(user_password, user.user_password);
 
         if (!validPassword) {
             return res.status(401).json({
@@ -115,30 +125,31 @@ router.post("/pcplus/api/auth", upload.none(), async (req, res) => {
             });
         }
 
-        const access_token = createToken(user.user_email);
+        const access_token = createToken(user);
 
         return res.json({
             access_token,
             token_type: "bearer",
-            user_email: user.user_email
+            user: formatUserResponse(user)
         });
 
     } catch (error) {
-        return res.status(400).json({
-            detail: error.message
-        });
+        return res.status(400).json({ detail: error.message });
     }
 });
 
 router.post("/pcplus/api/signin", async (req, res) => {
     try {
-        const {
-            user_email,
-            user_password
-        } = req.body;
+        const { user_email, user_password } = req.body;
 
         const user = await User.findOne({
-            where: { user_email }
+            where: { user_email },
+            include: [
+                {
+                    model: Role,
+                    include: [Permission]
+                }
+            ]
         });
 
         if (!user) {
@@ -147,10 +158,7 @@ router.post("/pcplus/api/signin", async (req, res) => {
             });
         }
 
-        const validPassword = await bcrypt.compare(
-            user_password,
-            user.user_password
-        );
+        const validPassword = await bcrypt.compare(user_password, user.user_password);
 
         if (!validPassword) {
             return res.status(401).json({
@@ -158,18 +166,16 @@ router.post("/pcplus/api/signin", async (req, res) => {
             });
         }
 
-        const access_token = createToken(user.user_email);
+        const access_token = createToken(user);
 
         return res.json({
             access_token,
-            user_email: user.user_email,
-            token_type: "bearer"
+            token_type: "bearer",
+            user: formatUserResponse(user)
         });
 
     } catch (error) {
-        return res.status(400).json({
-            detail: error.message
-        });
+        return res.status(400).json({ detail: error.message });
     }
 });
 

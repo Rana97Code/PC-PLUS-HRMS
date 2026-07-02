@@ -3,14 +3,16 @@ import { Link, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../../store/themeConfigSlice';
 import axios from 'axios';
-import UserContext from '../../../context/UserContex';
 import { useReactToPrint } from 'react-to-print';
+import { useSelector } from 'react-redux';
+import { IRootState } from '../../../store';
 
 const TransactionInvoice = () => {
     const params = useParams();
-    const user = useContext(UserContext);
-    const headers = user.headers;
-    const baseUrl = user.base_url;
+    const auth = useSelector((state: IRootState) => state.auth);
+    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
+    
     const dispatch = useDispatch();
 
     const printRef = useRef<HTMLDivElement>(null);

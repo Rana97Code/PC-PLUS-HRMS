@@ -3,7 +3,7 @@ const { Op, fn, col, literal } = require("sequelize");
 
 const Transaction = require("../models/Transaction");
 const Balance = require("../models/Balance");
-const User = require("../models/User");
+const User = require("../models/auth/User");
 const Due = require("../models/Due");
 
 const { getCurrentActiveUser } = require("../middleware/authMiddleware");

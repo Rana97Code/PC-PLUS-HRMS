@@ -1,11 +1,13 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import UserContex from '../../../context/UserContex';
+import { useSelector } from 'react-redux';
+import { IRootState } from '../../../store';
 
 const Index = () => {
-    const user = useContext(UserContex);
-    const baseUrl = user.base_url;
+    const auth = useSelector((state: IRootState) => state.auth);
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
+    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
 
     const [dues, setDues] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -24,7 +26,7 @@ const Index = () => {
 
             const response = await axios.get(
                 `${baseUrl}/due/available-invoices/${dueType}?page=${page}&limit=${limit}&search=${search}`,
-                { headers: user.headers }
+                { headers }
             );
 
             setDues(response.data.data || []);

@@ -21,13 +21,17 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
         document.documentElement.scrollTop = 0;
     };
 
+    // const onScrollHandler = () => {
+    //     if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
+    //         setShowTopButton(true);
+    //     } else {
+    //         setShowTopButton(false);
+    //     }
+    // };
     const onScrollHandler = () => {
-        if (document.body.scrollTop > 50 || document.documentElement.scrollTop > 50) {
-            setShowTopButton(true);
-        } else {
-            setShowTopButton(false);
-        }
-    };
+            const shouldShow = document.body.scrollTop > 50 || document.documentElement.scrollTop > 50;
+            setShowTopButton((prev) => (prev === shouldShow ? prev : shouldShow));
+        };
 
     useEffect(() => {
         window.addEventListener('scroll', onScrollHandler);
@@ -41,7 +45,7 @@ const DefaultLayout = ({ children }: PropsWithChildren) => {
         }
 
         return () => {
-            window.removeEventListener('onscroll', onScrollHandler);
+            window.removeEventListener('scroll', onScrollHandler);
         };
     }, []);
 

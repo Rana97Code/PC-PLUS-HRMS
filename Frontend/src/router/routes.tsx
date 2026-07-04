@@ -12,6 +12,16 @@ const Roles = lazy(() => import('../pages/Settings/Roles'));
 const Permissions = lazy(() => import('../pages/Settings/Permissions'));
 const RolePermissions = lazy(() => import('../pages/Settings/RolePermissions'));
 
+const Employee = lazy(() => import('../pages/Employee/index'));
+const EmployeeAdd = lazy(() => import('../pages/Employee/component/addEmployee'));
+const Department = lazy(() => import('../pages/Employee/Department/index'));
+const AddDepartment = lazy(() => import('../pages/Employee/Department/conponents/addDepartment'));
+const EditDepartment = lazy(() => import('../pages/Employee/Department/conponents/editDepartment'));
+const Designation = lazy(() => import('../pages/Employee/Designation/index'));
+const DesignationAdd = lazy(() => import('../pages/Employee/Designation/components/addDesignation'));
+const DesignationEdit = lazy(() => import('../pages/Employee/Designation/components/editDesignation'));
+
+
 const AccountsSummary = lazy(() => import('../pages/Accounts/Balance/AccountsSummary'));
 
 const Transaction = lazy(() => import('../pages/Accounts/Transaction/index'));
@@ -74,6 +84,54 @@ const routes = [
         element: <RolePermissions />,
         permission: 'role_permission_manage',
     },
+    {
+        path: '/pages/settings',
+        element: <div>Settings</div>,
+    },
+
+    
+    {
+        path: '/pages/employee',
+        element: <Employee />,
+        permission: 'employee_view',
+    },
+    {
+        path: '/pages/employee/add',
+        element: <EmployeeAdd />,
+        permission: 'employee_add',
+    },
+    {
+        path: '/pages/employee/department',
+        element: <Department />,
+        permission: 'department_view',
+    },
+    {
+        path: '/pages/employee/department/add',
+        element: <AddDepartment />,
+        permission: 'department_add',
+    },
+    {
+        path: '/pages/employee/department/edit/:id',
+        element: <EditDepartment />,
+        permission: 'department_edit',
+    },
+    {
+        path: '/pages/employee/designation',
+        element: <Designation />,
+        permission: 'designation_view',
+    },
+    {
+        path: '/pages/employee/designation/add',
+        element: <DesignationAdd />,
+        permission: 'designation_add',
+    },
+    {
+        path: '/pages/employee/designation/edit/:id',
+        element: <DesignationEdit />,
+        permission: 'designation_edit',
+    },
+
+
     {
         path: '/pages/accounts/summary',
         element: <AccountsSummary />,

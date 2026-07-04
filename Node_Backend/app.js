@@ -13,12 +13,18 @@ require("./models/Due");
 require("./models/auth/Role");
 require("./models/auth/Permission");
 require("./models/auth/RolePermission");
+require("./models/employee/Employee");
+require("./models/employee/Department");
+require("./models/employee/Designation");
 
 const authController = require("./controllers/authController");
 const rolePermissionController = require("./controllers/rolePermissionController");
 const userController = require("./controllers/userController");
 const transactionController = require("./controllers/transactionController");
 const dueController = require("./controllers/dueController");
+const employeeController = require("./controllers/employee/employeeController");
+const departmentController = require("./controllers/employee/departmentController");
+const designationController = require("./controllers/employee/designationController");
 
 const app = express();
 
@@ -60,6 +66,9 @@ app.use(rolePermissionController);
 app.use(userController);
 app.use(transactionController);
 app.use(dueController);
+app.use(employeeController);
+app.use(departmentController);
+app.use(designationController);
 
 const PORT = process.env.PORT || 3000;
 

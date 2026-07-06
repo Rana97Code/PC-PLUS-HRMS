@@ -4,6 +4,7 @@ const path = require("path");
 require("dotenv").config();
 
 const sequelize = require("./config/db");
+const seedDatabase = require("./seeders");
 
 // Import models so Sequelize knows them
 require("./models/auth/User");
@@ -16,6 +17,7 @@ require("./models/auth/RolePermission");
 require("./models/employee/Employee");
 require("./models/employee/Department");
 require("./models/employee/Designation");
+require("./models/employee/EmployeeAssociations");
 
 const authController = require("./controllers/authController");
 const rolePermissionController = require("./controllers/rolePermissionController");
@@ -77,8 +79,10 @@ sequelize.authenticate()
         console.log("Database connected successfully");
         return sequelize.sync(); // creates missing tables
     })
-    .then(() => {
+    .then(async () => {
         console.log("Database synced successfully");
+
+        await seedDatabase();
 
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);

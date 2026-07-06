@@ -48,7 +48,7 @@ const AddDesignation = () => {
                 department_id: Number(form.department_id),
             }, { headers });
 
-            navigate('/pages/hrms/designations');
+            navigate('/pages/employee/designation');
         } catch (error: any) {
             alert(error?.response?.data?.detail || 'Failed to create designation');
         }
@@ -61,7 +61,7 @@ const AddDesignation = () => {
                     Add Designation
                 </h2>
 
-                <Link to="/pages/hrms/designations" className="btn btn-secondary gap-2">
+                <Link to="/pages/employee/designation" className="btn btn-secondary gap-2">
                     Back to List
                 </Link>
             </div>
@@ -135,7 +135,7 @@ const AddDesignation = () => {
                                 Save Designation
                             </button>
 
-                            <Link to="/pages/hrms/designations">
+                            <Link to="/pages/employee/designation">
                                 <button type="button" className="btn btn-secondary gap-2">
                                     Cancel
                                 </button>

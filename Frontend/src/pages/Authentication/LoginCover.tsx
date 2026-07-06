@@ -24,7 +24,7 @@ const LoginCover = () => {
 
     useEffect(() => {
         if (user?.id) {
-            navigate('/index', { replace: true });
+            navigate('/pages/erp/modules', { replace: true });
         }
     }, [user?.id, navigate]);
 
@@ -48,7 +48,7 @@ const LoginCover = () => {
                     })
                 );
 
-                navigate('/index');
+                navigate('/pages/erp/modules');
             } else {
                 Swal.fire({
                     icon: 'error',

@@ -1,0 +1,1 @@
+import{j as t,b as e}from"./index-270313b5.js";const a=()=>t("div",{className:"panel text-center",children:[e("h1",{className:"text-2xl font-bold text-danger",children:"403 Unauthorized"}),e("p",{className:"mt-3",children:"You do not have permission to access this page."})]});export{a as default};

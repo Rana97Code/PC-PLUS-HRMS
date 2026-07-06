@@ -243,14 +243,14 @@ const EmployeesIndex = () => {
                                     render: ({ id }: any) => (
                                         <div className="flex items-center justify-center gap-2">
                                             <Link
-                                                to={`/pages/hrms/employees/view/${id}`}
+                                                to={`/pages/employee/view/${id}`}
                                                 className="btn btn-sm btn-outline-info"
                                             >
                                                 View
                                             </Link>
 
                                             <Link
-                                                to={`/pages/hrms/employees/edit/${id}`}
+                                                to={`/pages/employee/edit/${id}`}
                                                 className="btn btn-sm btn-outline-primary"
                                             >
                                                 Edit

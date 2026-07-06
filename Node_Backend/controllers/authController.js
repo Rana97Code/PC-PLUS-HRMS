@@ -126,13 +126,13 @@ router.post("/pcplus/api/auth", upload.none(), async (req, res) => {
         }
 
         const access_token = createToken(user);
+        // console.log(formatUserResponse(user));
 
         return res.json({
             access_token,
             token_type: "bearer",
             user: formatUserResponse(user)
         });
-
     } catch (error) {
         return res.status(400).json({ detail: error.message });
     }

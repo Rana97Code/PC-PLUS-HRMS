@@ -53,7 +53,7 @@ router.get(
 router.get(
     "/pcplus/api/departments/:id",
     getCurrentActiveUser,
-    checkPermission("department_view"),
+    checkPermission("department_view_details"),
     async (req, res) => {
         try {
             const department = await Department.findByPk(req.params.id);
@@ -73,7 +73,7 @@ router.get(
 router.put(
     "/pcplus/api/departments/:id",
     getCurrentActiveUser,
-    checkPermission("department_update"),
+    checkPermission("department_edit"),
     async (req, res) => {
         try {
             const department = await Department.findByPk(req.params.id);

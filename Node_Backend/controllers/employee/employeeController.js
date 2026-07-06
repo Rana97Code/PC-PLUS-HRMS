@@ -50,7 +50,7 @@ router.get(
 );
 
 // CREATE
-router.post("/pcplus/api/employees", getCurrentActiveUser,checkPermission("employee_create"), async (req, res) => {
+router.post("/pcplus/api/employee", getCurrentActiveUser,checkPermission("employee_add"), async (req, res) => {
     try {
         const employee = await Employee.create(req.body);
         res.status(201).json(employee);
@@ -73,7 +73,7 @@ router.get("/pcplus/api/employees", getCurrentActiveUser, checkPermission("emplo
 });
 
 // SINGLE
-router.get("/pcplus/api/employees/:id", getCurrentActiveUser, checkPermission("employee_single"), async (req, res) => {
+router.get("/pcplus/api/employee/:id", getCurrentActiveUser, checkPermission("employee_details"), async (req, res) => {
     try {
         const employee = await Employee.findByPk(req.params.id);
 
@@ -88,7 +88,7 @@ router.get("/pcplus/api/employees/:id", getCurrentActiveUser, checkPermission("e
 });
 
 // UPDATE
-router.put("/pcplus/api/employees/:id", getCurrentActiveUser, checkPermission("employee_update"), async (req, res) => {
+router.put("/pcplus/api/employee/:id", getCurrentActiveUser, checkPermission("employee_edit"), async (req, res) => {
     try {
         const employee = await Employee.findByPk(req.params.id);
 

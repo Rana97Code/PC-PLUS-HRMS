@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { IRootState } from '../store';
@@ -30,8 +30,9 @@ const Index = () => {
 
     const auth = useSelector((state: IRootState) => state.auth);
     const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
-    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
-
+    const headers = useMemo(() => {
+        return auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
+    }, [auth.token]);
     const isDark = useSelector((state: IRootState) => state.themeConfig.theme === 'dark' || state.themeConfig.isDarkMode);
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl';
 
@@ -55,35 +56,32 @@ const Index = () => {
         dispatch(setPageTitle('Sales Admin'));
     }, [dispatch]);
 
-    useEffect(() => {
-        if (!baseUrl || !headers) return;
 
-        axios
-            .get(`${baseUrl}/accounts/monthly-chart`, { headers })
-            .then((response) => {
-                setChartData({
-                    office_investment: response.data?.office_investment || defaultMonthlyData,
-                    income: response.data?.income || defaultMonthlyData,
-                    expenses: response.data?.expenses || defaultMonthlyData,
-                    profit: response.data?.profit || defaultMonthlyData,
-                });
-            })
-            .catch((error) => {
-                console.error('Monthly chart error:', error);
-            });
 
-        axios
-            .get(`${baseUrl}/accounts/cost-pie-chart`, { headers })
-            .then((response) => {
-                setCostPieData({
-                    series: response.data?.series || [0, 0, 0, 0],
-                    labels: response.data?.labels || ['Today', 'This Week', 'This Month', 'Last Month'],
-                });
-            })
-            .catch((error) => {
-                console.error('Cost pie chart error:', error);
+useEffect(() => {
+    if (!auth.token) return;
+
+    axios.get(`${baseUrl}/accounts/monthly-chart`, { headers })
+        .then((response) => {
+            setChartData({
+                office_investment: response.data?.office_investment || defaultMonthlyData,
+                income: response.data?.income || defaultMonthlyData,
+                expenses: response.data?.expenses || defaultMonthlyData,
+                profit: response.data?.profit || defaultMonthlyData,
             });
-    }, [baseUrl, headers]);
+        })
+        .catch((error) => console.error('Monthly chart error:', error));
+
+    axios.get(`${baseUrl}/accounts/cost-pie-chart`, { headers })
+        .then((response) => {
+            setCostPieData({
+                series: response.data?.series || [0, 0, 0, 0],
+                labels: response.data?.labels || ['Today', 'This Week', 'This Month', 'Last Month'],
+            });
+        })
+        .catch((error) => console.error('Cost pie chart error:', error));
+
+}, [baseUrl, auth.token]);
 
     const costSeries = costPieData?.series || [0, 0, 0, 0];
     const costLabels = costPieData?.labels || ['Today', 'This Week', 'This Month', 'Last Month'];
@@ -515,7 +513,7 @@ const Index = () => {
 
     return (
         <div>
-            <ul className="flex space-x-2 rtl:space-x-reverse">
+           {/*  <ul className="flex space-x-2 rtl:space-x-reverse">
                 <li>
                     <Link to="/" className="text-primary hover:underline">
                         Dashboard
@@ -523,8 +521,16 @@ const Index = () => {
                 </li>
                 <li className="before:content-['/'] ltr:before:mr-2 rtl:before:ml-2">
                     <span>Sales</span>
-                </li>
-            </ul>
+                </li> 
+
+
+            </ul>*/}
+            <div className="panel flex items-center justify-between flex-wrap gap-4">
+                <Link to="/pages/erp/modules" className="btn btn-secondary gap-2">
+                    Back to ERP Module
+                </Link>
+
+            </div>
 
             <div className="pt-5">
                 <div className="grid xl:grid-cols-3 gap-6 mb-6">

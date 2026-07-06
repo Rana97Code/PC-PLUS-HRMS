@@ -10,8 +10,8 @@ const Employee = sequelize.define("Employee", {
     email: { type: DataTypes.STRING },
     phone: { type: DataTypes.STRING },
 
-    department: { type: DataTypes.STRING },
-    designation: { type: DataTypes.STRING },
+    department_id: { type: DataTypes.INTEGER },
+    designation_id: { type: DataTypes.INTEGER },  
 
     joining_date: { type: DataTypes.DATEONLY },
     salary: { type: DataTypes.FLOAT, defaultValue: 0 },

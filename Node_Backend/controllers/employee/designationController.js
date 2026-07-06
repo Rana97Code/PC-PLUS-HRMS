@@ -62,7 +62,7 @@ router.get(
 router.get(
     "/pcplus/api/designations/:id",
     getCurrentActiveUser,
-    checkPermission("designation_view"),
+    checkPermission("designation_view_details"),
     async (req, res) => {
         try {
             const designation = await Designation.findByPk(req.params.id, {
@@ -89,7 +89,7 @@ router.get(
 router.put(
     "/pcplus/api/designations/:id",
     getCurrentActiveUser,
-    checkPermission("designation_update"),
+    checkPermission("designation_edit"),
     async (req, res) => {
         try {
             const designation = await Designation.findByPk(req.params.id);

@@ -28,7 +28,7 @@ const AddDepartment = () => {
 
         try {
             await axios.post(`${baseUrl}/departments`, form, { headers });
-            navigate('/pages/hrms/departments');
+            navigate('/pages/employee/department');
         } catch (error: any) {
             alert(error?.response?.data?.detail || 'Failed to create department');
         }
@@ -41,7 +41,7 @@ const AddDepartment = () => {
                     Add Department
                 </h2>
 
-                <Link to="/pages/hrms/departments" className="btn btn-secondary gap-2">
+                <Link to="/pages/employee/department" className="btn btn-secondary gap-2">
                     Back to List
                 </Link>
             </div>
@@ -98,7 +98,7 @@ const AddDepartment = () => {
                                 Save Department
                             </button>
 
-                            <Link to="/pages/hrms/departments">
+                            <Link to="/pages/employee/department">
                                 <button type="button" className="btn btn-secondary gap-2">
                                     Cancel
                                 </button>

@@ -12,7 +12,7 @@ const checkPermission = require("../../middleware/checkPermission");
 router.post(
     "/pcplus/api/designations",
     getCurrentActiveUser,
-    checkPermission("designation_create"),
+    checkPermission("designation_add"),
     async (req, res) => {
         try {
             const designation = await Designation.create(req.body);

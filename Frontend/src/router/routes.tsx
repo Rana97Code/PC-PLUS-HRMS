@@ -17,6 +17,8 @@ const RolePermissions = lazy(() => import('../pages/Settings/RolePermissions'));
 
 const Employee = lazy(() => import('../pages/Employee/index'));
 const EmployeeAdd = lazy(() => import('../pages/Employee/component/addEmployee'));
+const AttendanceList = lazy(() => import('../pages/Employee/Attendance'));
+
 const Department = lazy(() => import('../pages/Employee/Department/index'));
 const AddDepartment = lazy(() => import('../pages/Employee/Department/conponents/addDepartment'));
 const EditDepartment = lazy(() => import('../pages/Employee/Department/conponents/editDepartment'));
@@ -72,6 +74,12 @@ const routes = [
         element: <Index />,
         module: 'hr',
         permission: 'hr_dashboard',
+    },
+    {
+        path: '/pages/employee/attendance',
+        element: <AttendanceList />,
+        module: 'hr',
+        permission: 'employee_attendance_view',
     },
     {
         path: '/pages/employees',
@@ -131,7 +139,7 @@ const routes = [
     // Accounts
     {
         path: '/pages/accounts/dashboard',
-        element: <AccountsSummary />,
+        element: <AccountsDashboard />,
         module: 'accounts',
         permission: 'accounts_dashboard',
     },

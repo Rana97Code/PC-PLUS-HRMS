@@ -10,7 +10,7 @@ const checkPermission = require("../../middleware/checkPermission");
 router.post(
     "/pcplus/api/departments",
     getCurrentActiveUser,
-    checkPermission("department_create"),
+    checkPermission("department_add"),
     async (req, res) => {
         try {
             const department = await Department.create(req.body);

@@ -18,6 +18,7 @@ require("./models/employee/Employee");
 require("./models/employee/Department");
 require("./models/employee/Designation");
 require("./models/employee/EmployeeAssociations");
+require("./models/employee/Attendance");
 
 const authController = require("./controllers/authController");
 const rolePermissionController = require("./controllers/rolePermissionController");
@@ -27,6 +28,7 @@ const dueController = require("./controllers/dueController");
 const employeeController = require("./controllers/employee/employeeController");
 const departmentController = require("./controllers/employee/departmentController");
 const designationController = require("./controllers/employee/designationController");
+const attendanceController = require("./controllers/employee/attendanceController");
 
 const app = express();
 
@@ -71,6 +73,7 @@ app.use(dueController);
 app.use(employeeController);
 app.use(departmentController);
 app.use(designationController);
+app.use(attendanceController);
 
 const PORT = process.env.PORT || 3000;
 

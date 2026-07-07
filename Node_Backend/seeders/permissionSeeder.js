@@ -108,6 +108,34 @@ const permissions = [
         route_path: "/pages/employee/add",
         status: 1,
     },
+        {
+        permission_name: "Employee Edit",
+        permission_key: "employee_edit",
+        module_name: "Employee",
+        route_path: "/pages/employees/edit",
+        status: 1,
+    },
+    {
+        permission_name: "Employee Details",
+        permission_key: "employee_details",
+        module_name: "Employee",
+        route_path: "/pages/employees/edit",
+        status: 1,
+    },
+    {
+        permission_name: "Employee Delete",
+        permission_key: "employee_delete",
+        module_name: "Employee",
+        route_path: "/pages/employees",
+        status: 1,
+    },
+    {
+        permission_name: "Employee Attendance View",
+        permission_key: "employee_attendance_view",
+        module_name: "Employee",
+        route_path: "/pages/employee/attendance",
+        status: 1,
+    },
     {
         permission_name: "Department View",
         permission_key: "department_view",
@@ -117,7 +145,7 @@ const permissions = [
     },
     {
         permission_name: "Department Add",
-        permission_key: "department_create",
+        permission_key: "department_add",
         module_name: "Department",
         route_path: "/pages/employee/department/add",
         status: 1,
@@ -138,7 +166,7 @@ const permissions = [
     },
     {
         permission_name: "Designation Add",
-        permission_key: "designation_create",
+        permission_key: "designation_add",
         module_name: "Designation",
         route_path: "/pages/employee/designation/add",
         status: 1,
@@ -178,27 +206,7 @@ const permissions = [
         route_path: "/department",
         status: 1,
     },
-    {
-        permission_name: "Employee Edit",
-        permission_key: "employee_edit",
-        module_name: "Employee",
-        route_path: "/pages/employees/edit",
-        status: 1,
-    },
-    {
-        permission_name: "Employee Details",
-        permission_key: "employee_details",
-        module_name: "Employee",
-        route_path: "/pages/employees/edit",
-        status: 1,
-    },
-    {
-        permission_name: "Employee Delete",
-        permission_key: "employee_delete",
-        module_name: "Employee",
-        route_path: "/pages/employees",
-        status: 1,
-    },
+
     {
         permission_name: "Accounts Dashboard",
         permission_key: "accounts_dashboard",

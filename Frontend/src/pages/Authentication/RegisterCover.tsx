@@ -5,7 +5,7 @@ import { setPageTitle, toggleRTL } from '../../store/themeConfigSlice';
 import Dropdown from '../../components/Dropdown';
 import { IRootState } from '../../store';
 import i18next from 'i18next';
-import axios from 'axios';
+import api from '../../api/axios';
 
 import IconCaretDown from '../../components/Icon/IconCaretDown';
 import IconUser from '../../components/Icon/IconUser';
@@ -17,7 +17,6 @@ import IconTwitter from '../../components/Icon/IconTwitter';
 import IconGoogle from '../../components/Icon/IconGoogle';
 
 const RegisterCover = () => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -60,7 +59,7 @@ const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
         setTokenError('');
         setLoading(true);
 
-        await axios.post(`${baseUrl}/create_user`, {
+        await api.post(`/create_user`, {
             user_name: name,
             user_phone: phone,
             user_email: email,

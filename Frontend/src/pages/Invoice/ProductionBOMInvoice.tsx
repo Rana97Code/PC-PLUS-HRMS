@@ -4,7 +4,7 @@ import { useEffect, useState, Fragment } from 'react';
 import sortBy from 'lodash/sortBy';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import axios from 'axios';
+import api from '../../api/axios';
 
 
 const ProductionBOMInvoice = () => {
@@ -17,7 +17,7 @@ const ProductionBOMInvoice = () => {
         if (token) {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
-        axios.get(`http://localhost:8080/pcplusvat/api/production-bom/bom_invoice/${params.id}`,{headers})
+        api.get(`http://localhost:8080/pcplusvat/api/production-bom/bom_invoice/${params.id}`,{headers})
             .then((response) => {
                 setRawMaterialsRecords(response.data.invoiceRawMaterialsArray);
                 setCostingRecords(response.data.costingArray);

@@ -2,7 +2,7 @@ import { useState, useEffect, useContext, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../../store/themeConfigSlice';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useReactToPrint } from 'react-to-print';
 import { useSelector } from 'react-redux';
 import { IRootState } from '../../../store';
@@ -10,8 +10,7 @@ import { IRootState } from '../../../store';
 const TransactionInvoice = () => {
     const params = useParams();
     const auth = useSelector((state: IRootState) => state.auth);
-    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
+
     
     const dispatch = useDispatch();
 
@@ -31,9 +30,7 @@ const TransactionInvoice = () => {
         dispatch(setPageTitle('Transaction Invoice'));
     }, [dispatch]);
 
-    useEffect(() => {
-        axios
-            .get(`${baseUrl}/transaction/transaction_invoice/${params.id}`, { headers })
+    useEffect(() => { api.get(`/transaction/transaction_invoice/${params.id}`)
             .then((response) => {
                 const data = response.data;
 

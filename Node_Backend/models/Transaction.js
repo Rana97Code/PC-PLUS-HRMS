@@ -14,7 +14,7 @@ const Transaction = sequelize.define("Transaction", {
     cost: { type: DataTypes.FLOAT, defaultValue: 0 },
     due_amount: { type: DataTypes.FLOAT, defaultValue: 0 },
     return_amount: { type: DataTypes.FLOAT, defaultValue: 0 },
-    transaction_notes: DataTypes.STRING,
+    transaction_notes: { type: DataTypes.TEXT, allowNull: true },
     status: { type: DataTypes.INTEGER, defaultValue: 0 },
     created_at: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     created_by: DataTypes.INTEGER,
@@ -22,7 +22,9 @@ const Transaction = sequelize.define("Transaction", {
     updated_by: DataTypes.INTEGER
 }, {
     tableName: "transactions",
-    timestamps: false
+    timestamps: false,
+    charset: "utf8mb4",
+    collate: "utf8mb4_unicode_ci"
 });
 
 module.exports = Transaction;

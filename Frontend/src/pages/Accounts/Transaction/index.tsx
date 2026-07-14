@@ -5,15 +5,13 @@ import sortBy from 'lodash/sortBy';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../../store/themeConfigSlice';
 import IconPlus from '../../../components/Icon/IconPlus';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useSelector } from 'react-redux';
 import { IRootState } from '../../../store';
 
 const TransactionIndex = () => {
     const dispatch = useDispatch();
     const auth = useSelector((state: IRootState) => state.auth);
-    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
 
     const PAGE_SIZES = [10, 20, 30, 50, 100];
 
@@ -27,6 +25,36 @@ const TransactionIndex = () => {
         direction: 'desc',
     });
 
+
+const formatTransactionDate = (dateValue?: string) => {
+    if (!dateValue) return '';
+
+    const datePart = dateValue.toString().split('T')[0];
+    const [year, month, day] = datePart.split('-');
+
+    if (!year || !month || !day) {
+        return dateValue.toString();
+    }
+
+    const months = [
+        'JAN',
+        'FEB',
+        'MAR',
+        'APR',
+        'MAY',
+        'JUN',
+        'JUL',
+        'AUG',
+        'SEP',
+        'OCT',
+        'NOV',
+        'DEC',
+    ];
+
+    return `${day}-${months[Number(month) - 1]}-${year}`;
+};
+
+
     useEffect(() => {
         dispatch(setPageTitle('Transaction List'));
     }, [dispatch]);
@@ -34,8 +62,7 @@ const TransactionIndex = () => {
     useEffect(() => {
         if (auth.token) {
 
-            axios
-                .get(`${baseUrl}/transaction/all_transaction`, { headers })
+            api.get(`/transaction/all_transaction`)
                 .then((response) => {
                     setRecords(response.data || []);
                 })
@@ -122,8 +149,14 @@ const TransactionIndex = () => {
                                     ),
                                 },
                                 { accessor: 'transaction_type', title: 'Type', sortable: true },
-                                { accessor: 'transaction_date', title: 'Date', sortable: true },
-                                { accessor: 'transaction_by', title: 'Transaction By', sortable: true },
+                                {
+                                    accessor: 'transaction_date',
+                                    title: 'Date',
+                                    sortable: true,
+                                    render: ({ transaction_date }) => (
+                                        <span>{formatTransactionDate(transaction_date)}</span>
+                                    ),
+                                },                                { accessor: 'transaction_by', title: 'Transaction By', sortable: true },
                                 { accessor: 'amount_in', title: 'Credit', sortable: true },
                                 { accessor: 'amount_out', title: 'Debit', sortable: true },
                             ]}

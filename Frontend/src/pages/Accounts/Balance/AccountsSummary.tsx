@@ -4,7 +4,7 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import sortBy from 'lodash/sortBy';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPageTitle } from '../../../store/themeConfigSlice';
-import axios from 'axios';
+import api from '../../../api/axios';
 import { useReactToPrint } from 'react-to-print';
 import { IRootState } from '../../../store';
 
@@ -13,8 +13,6 @@ const AccountsSummary = () => {
 
 
     const auth = useSelector((state: IRootState) => state.auth);
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
-    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
     const authToken = auth.token;
 
     const PAGE_SIZES = [10, 20, 30, 50, 100];
@@ -42,15 +40,15 @@ const AccountsSummary = () => {
 
     useEffect(() => {
         if (authToken) {
-            axios.get(`${baseUrl}/accounts/latest-balance`, { headers })
+            api.get(`/accounts/latest-balance`)
                 .then((response) => setBalance(response.data || {}))
                 .catch((error) => console.error('Error fetching balance:', error));
 
-            axios.get(`${baseUrl}/accounts/investor-contribution`, { headers })
+            api.get(`/accounts/investor-contribution`)
                 .then((response) => setInvestors(response.data || []))
                 .catch((error) => console.error('Error fetching investor contribution:', error));
         }
-    }, [authToken, baseUrl]);
+    }, [authToken]);
 
     const filteredInvestors = useMemo(() => {
         const query = search.toLowerCase();
@@ -85,7 +83,7 @@ const AccountsSummary = () => {
 
         try {
             const safeInvestorName = encodeURIComponent(investorName);
-            const response = await axios.get(`${baseUrl}/accounts/investor-contribution/${safeInvestorName}`, { headers });
+            const response = await api.get(`/accounts/investor-contribution/${safeInvestorName}`);
 
             setInvestorRecords(response.data || []);
         } catch (error) {

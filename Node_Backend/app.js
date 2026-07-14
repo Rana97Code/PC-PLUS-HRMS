@@ -8,6 +8,7 @@ const seedDatabase = require("./seeders");
 
 // Import models so Sequelize knows them
 require("./models/auth/User");
+require("./models/employee/Attendance");
 require("./models/Transaction");
 require("./models/Balance");
 require("./models/Due");
@@ -18,14 +19,16 @@ require("./models/employee/Employee");
 require("./models/employee/Department");
 require("./models/employee/Designation");
 require("./models/employee/EmployeeAssociations");
-require("./models/employee/Attendance");
 
 const authController = require("./controllers/authController");
-const rolePermissionController = require("./controllers/rolePermissionController");
+const rolePermissionController = require("./controllers/settings/rolePermissionController");
+const settingsDashboardController = require("./controllers/settings/settingsDashboardController");
+
 const userController = require("./controllers/userController");
 const transactionController = require("./controllers/transactionController");
 const dueController = require("./controllers/dueController");
 const employeeController = require("./controllers/employee/employeeController");
+const dashboardController = require("./controllers/employee/dashboardController");
 const departmentController = require("./controllers/employee/departmentController");
 const designationController = require("./controllers/employee/designationController");
 const attendanceController = require("./controllers/employee/attendanceController");
@@ -66,14 +69,16 @@ app.get("/", (req, res) => {
 });
 
 app.use(authController);
+app.use(attendanceController);
 app.use(rolePermissionController);
+app.use(settingsDashboardController);
 app.use(userController);
 app.use(transactionController);
 app.use(dueController);
 app.use(employeeController);
+app.use(dashboardController);
 app.use(departmentController);
 app.use(designationController);
-app.use(attendanceController);
 
 const PORT = process.env.PORT || 3000;
 

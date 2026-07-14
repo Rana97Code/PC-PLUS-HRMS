@@ -3,10 +3,11 @@ import ERPModules from '../pages/ERPModules';
 
 // const file = lazy(() => import('../../public/assets/excel_file/'));
 const Index = lazy(() => import('../pages/Index'));
-const Profile = lazy(() => import('../pages/GeneralSettings/User/Profile'));
+const Profile = lazy(() => import('../pages/Users/Profile'));
 const LoginCover = lazy(() => import('../pages/Authentication/LoginCover'));
 const RegisterCover = lazy(() => import('../pages/Authentication/RegisterCover'));
 
+const HRMSDashboard = lazy(() => import('../pages/HRMS/HRMSDashboard'));
 const AccountsDashboard = lazy(() => import('../pages/Accounts/AccountsDashboard'));
 const SettingsDashboard = lazy(() => import('../pages/Settings/SettingsDashboard'));
 
@@ -15,16 +16,17 @@ const Roles = lazy(() => import('../pages/Settings/Roles'));
 const Permissions = lazy(() => import('../pages/Settings/Permissions'));
 const RolePermissions = lazy(() => import('../pages/Settings/RolePermissions'));
 
-const Employee = lazy(() => import('../pages/Employee/index'));
-const EmployeeAdd = lazy(() => import('../pages/Employee/component/addEmployee'));
-const AttendanceList = lazy(() => import('../pages/Employee/Attendance'));
+const Employee = lazy(() => import('../pages/HRMS/Employee/index'));
+const EmployeeAdd = lazy(() => import('../pages/HRMS/Employee/component/addEmployee'));
+const AttendanceList = lazy(() => import('../pages/HRMS/Employee/Attendance'));
+const EmployeeView = lazy(() => import('../pages/HRMS/Employee/EmployeeView'));
 
-const Department = lazy(() => import('../pages/Employee/Department/index'));
-const AddDepartment = lazy(() => import('../pages/Employee/Department/conponents/addDepartment'));
-const EditDepartment = lazy(() => import('../pages/Employee/Department/conponents/editDepartment'));
-const Designation = lazy(() => import('../pages/Employee/Designation/index'));
-const DesignationAdd = lazy(() => import('../pages/Employee/Designation/components/addDesignation'));
-const DesignationEdit = lazy(() => import('../pages/Employee/Designation/components/editDesignation'));
+const Department = lazy(() => import('../pages/HRMS/Employee/Department/index'));
+const AddDepartment = lazy(() => import('../pages/HRMS/Employee/Department/conponents/addDepartment'));
+const EditDepartment = lazy(() => import('../pages/HRMS/Employee/Department/conponents/editDepartment'));
+const Designation = lazy(() => import('../pages/HRMS/Employee/Designation/index'));
+const DesignationAdd = lazy(() => import('../pages/HRMS/Employee/Designation/components/addDesignation'));
+const DesignationEdit = lazy(() => import('../pages/HRMS/Employee/Designation/components/editDesignation'));
 
 
 const AccountsSummary = lazy(() => import('../pages/Accounts/Balance/AccountsSummary'));
@@ -69,12 +71,19 @@ const routes = [
     },
 
     // HRMS
+    // {
+    //     path: '/pages/hr/dashboard',
+    //     element: <Index />,
+    //     module: 'hr',
+    //     permission: 'hr_dashboard',
+    // },
     {
         path: '/pages/hr/dashboard',
-        element: <Index />,
+        element: <HRMSDashboard />,
         module: 'hr',
         permission: 'hr_dashboard',
     },
+
     {
         path: '/pages/employee/attendance',
         element: <AttendanceList />,
@@ -96,6 +105,12 @@ const routes = [
     {
         path: '/pages/employee/edit/:id',
         element: <EmployeeAdd />,
+        module: 'hr',
+        permission: 'employee_details',
+    },
+    {
+        path: '/pages/employee/view/:id',
+        element: <EmployeeView />,
         module: 'hr',
         permission: 'employee_details',
     },

@@ -99,14 +99,14 @@ const HRSidebar = () => {
                                     <AnimateHeight duration={300} height={currentMenu === 'Employee' ? 'auto' : 0}>
                                         <ul className="sub-menu text-gray-500">
                                             {can('employee_view') && (
-                                                <>
-                                                    <li>
-                                                        <NavLink to="/pages/employees">{t('Employee List')}</NavLink>
-                                                    </li>
-                                                    <li>
-                                                        <NavLink to="/pages/employee/attendance">{t('Employee Attendance')}</NavLink>
-                                                    </li>
-                                                </>
+                                                <li>
+                                                    <NavLink to="/pages/employees">{t('Employee List')}</NavLink>
+                                                </li>
+                                            )}
+                                            {can('employee_attendance_view') && (
+                                                <li>
+                                                    <NavLink to="/pages/employee/attendance">{t('Employee Attendance')}</NavLink>
+                                                </li>
                                             )}
 
                                             {can('designation_view') && (

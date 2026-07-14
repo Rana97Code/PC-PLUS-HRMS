@@ -4,7 +4,7 @@ import { DataTable, DataTableSortStatus } from 'mantine-datatable';
 import sortBy from 'lodash/sortBy';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import axios from 'axios';
+import api from '../../api/axios';
 import UserContext from '../../context/UserContex';
 
 const PurchaseInvoice = () => {
@@ -15,7 +15,7 @@ const PurchaseInvoice = () => {
 
     useEffect(() => {
         if (user) {
-        axios.get(`${baseUrl}/purchase/purchase_invoice/${params.id}`,{headers})
+        api.get(`${baseUrl}/purchase/purchase_invoice/${params.id}`,{headers})
             .then((response) => {
                 setRawMaterialsRecords(response.data.items);
                 setChalanDate(response.data.chalan_date);

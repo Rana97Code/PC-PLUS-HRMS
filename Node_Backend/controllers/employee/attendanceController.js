@@ -106,7 +106,6 @@ router.get("/pcplus/api/attendance/daily", getCurrentActiveUser, async (req, res
             include: [
                 {
                     model: Attendance,
-                    as: "attendance",
                     required: false,
                     where: {
                         attendance_date: attendanceDate,

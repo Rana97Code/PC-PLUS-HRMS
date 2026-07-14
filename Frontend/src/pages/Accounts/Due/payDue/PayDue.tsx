@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../../../api/axios';
 import { useSelector } from 'react-redux';
 import { IRootState } from '../../../../store';
 
@@ -9,9 +9,6 @@ const PayDue = () => {
     const { source_type, source_id, due_type } = useParams();
 
     const auth = useSelector((state: IRootState) => state.auth);
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
-    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
-
     const today = new Date().toISOString().slice(0, 10);
 
     const [selectedData, setSelectedData] = useState<any>(null);
@@ -36,9 +33,8 @@ const PayDue = () => {
         try {
             setLoading(true);
 
-            const res = await axios.get(
-                `${baseUrl}/due/payment-invoice/${source_type}/${source_id}/${due_type}`,
-                { headers }
+            const res = await api.get(
+                `/due/payment-invoice/${source_type}/${source_id}/${due_type}`
             );
 
             setSelectedData(res.data);
@@ -75,8 +71,8 @@ const PayDue = () => {
         }
 
         try {
-            await axios.post(
-                `${baseUrl}/due/process-due`,
+            await api.post(
+                `/due/process-due`,
                 {
                     source_type,
                     source_id,
@@ -89,8 +85,7 @@ const PayDue = () => {
                     note: form.note,
                     created_by: form.created_by,
                     due_date: form.due_date,
-                },
-                { headers }
+                }
             );
 
             navigate('/pages/accounts/due');

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../../../../api/axios';
 import IconFile from '../../../../components/Icon/IconFile';
 import IconTrashLines from '../../../../components/Icon/IconTrashLines';
 import IconArrowBackward from '../../../../components/Icon/IconArrowBackward';
@@ -11,13 +11,39 @@ const AddTransaction: React.FC = () => {
     const navigate = useNavigate();
     const auth = useSelector((state: IRootState) => state.auth);
 
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
-    const headers = auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
     
     const getTodayDate = () => {
         const today = new Date();
         return today.toISOString().split('T')[0];
     };
+
+const formatTransactionDate = (dateValue?: string) => {
+    if (!dateValue) return '';
+
+    const datePart = dateValue.toString().split('T')[0];
+    const [year, month, day] = datePart.split('-');
+
+    if (!year || !month || !day) {
+        return dateValue.toString();
+    }
+
+    const months = [
+        'JAN',
+        'FEB',
+        'MAR',
+        'APR',
+        'MAY',
+        'JUN',
+        'JUL',
+        'AUG',
+        'SEP',
+        'OCT',
+        'NOV',
+        'DEC',
+    ];
+
+    return `${day}-${months[Number(month) - 1]}-${year}`;
+};
 
     const emptyForm = {
         transaction_date: getTodayDate(),
@@ -35,16 +61,23 @@ const AddTransaction: React.FC = () => {
     };
 
     const debitTransactionTypes = [
-        { value: 'Utilities', label: 'Utilities' },
-        { value: 'Bazzar', label: 'Bazzar' },
-        { value: 'Transport', label: 'Transport' },
-        { value: 'Food', label: 'Food' },
-        { value: 'Stationery', label: 'Stationery' },
-        { value: 'Internet Bill', label: 'Internet Bill' },
-        { value: 'Mobile Bill', label: 'Mobile Bill' },
+        { value: 'Food and Beverage', label: 'Food and Beverage' },
+        { value: 'Cleaning & Hygiene Item', label: 'Cleaning & Hygiene Item' },
+        { value: 'Electronic Items', label: 'Electronic Items' },
         { value: 'Electricity Bill', label: 'Electricity Bill' },
-        { value: 'Rent', label: 'Rent' },
+        { value: 'Grocery', label: 'Grocery' },
+        { value: 'Hardware', label: 'Hardware' },
+        { value: 'Household Items', label: 'Household Items' },
+        { value: 'Internet Bill', label: 'Internet Bill' },
+        { value: 'Kitchen Crokeries', label: 'Kitchen Crokeries' },
+        { value: 'License & Registration Expense', label: 'License & Registration Expense' },
+        { value: 'Mobile Bill', label: 'Mobile Bill' },
         { value: 'Maintenance', label: 'Maintenance' },
+        { value: 'Rent', label: 'Rent' },
+        { value: 'Software Items', label: 'Software Items' },
+        { value: 'Stationery', label: 'Stationery' },
+        { value: 'Transport', label: 'Transport' },
+        { value: 'Utilities', label: 'Utilities' },
         { value: 'Other Office Cost', label: 'Other Office Cost' },
     ];
 
@@ -183,7 +216,7 @@ const AddTransaction: React.FC = () => {
         }
 
         try {
-            await axios.post(`${baseUrl}/transaction/add-multiple-transaction`, transactionList, { headers });
+            await api.post(`/transaction/add-multiple-transaction`, transactionList);
             navigate('/pages/accounts/transaction');
         } catch (error: any) {
             console.error('Transaction submit error:', error);
@@ -214,15 +247,19 @@ const AddTransaction: React.FC = () => {
 
                     <form className="space-y-5" onSubmit={handleSubmit}>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-                            <div>
-                                <label>Transaction Date</label>
-                                <input
-                                    type="date"
-                                    className="form-input"
-                                    value={form.transaction_date}
-                                    onChange={(e) => handleChange('transaction_date', e.target.value)}
-                                />
-                            </div>
+                        <div>
+                            <label>Transaction Date</label>
+
+                            <input
+                                type="date"
+                                className="form-input"
+                                value={form.transaction_date}
+                                onChange={(e) =>
+                                    handleChange('transaction_date', e.target.value)
+                                }
+                            />
+
+                        </div>
 
                             <div>
                                 <label>Debit/Credit</label>
@@ -389,7 +426,7 @@ const AddTransaction: React.FC = () => {
                                     {transactionList.map((item, index) => (
                                         <tr key={index}>
                                             <td>{index + 1}</td>
-                                            <td>{item.transaction_date}</td>
+                                            <td>{formatTransactionDate(item.transaction_date)}</td>
                                             <td>{item.transaction_type}</td>
                                             <td>{item.transaction_by}</td>
                                             <td>{item.transaction_to}</td>

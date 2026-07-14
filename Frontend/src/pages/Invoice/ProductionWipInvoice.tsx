@@ -4,7 +4,7 @@ import { useEffect, useState, Fragment } from 'react';
 import sortBy from 'lodash/sortBy';
 import { useDispatch } from 'react-redux';
 import { setPageTitle } from '../../store/themeConfigSlice';
-import axios from 'axios';
+import api from '../../api/axios';
 
 
 const ProductionWipInvoice = () => {
@@ -16,7 +16,7 @@ const ProductionWipInvoice = () => {
         if (token) {
             const bearer = JSON.parse(token);
             const headers = { Authorization: `Bearer ${bearer}` }
-        axios.get(`http://localhost:8080/pcplusvat/api/production-wip/production_invoice/${params.id}`,{headers})
+        api.get(`http://localhost:8080/pcplusvat/api/production-wip/production_invoice/${params.id}`,{headers})
             .then((response) => {
                 setInitialRecords(response.data);
             })

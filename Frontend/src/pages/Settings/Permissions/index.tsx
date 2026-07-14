@@ -1,14 +1,8 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../../api/axios';
 import Swal from 'sweetalert2';
 
 const Permissions = () => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
-    const token = localStorage.getItem('token');
-
-    const headers = {
-        Authorization: `Bearer ${token}`
-    };
 
     const [permissions, setPermissions] = useState<any[]>([]);
     const [permissionName, setPermissionName] = useState('');
@@ -96,7 +90,7 @@ const Permissions = () => {
 ];
 
     const getPermissions = async () => {
-        const res = await axios.get(`${baseUrl}/permissions`, { headers });
+        const res = await api.get(`/permissions`);
         setPermissions(res.data);
     };
 
@@ -108,16 +102,15 @@ const Permissions = () => {
         e.preventDefault();
 
         try {
-            await axios.post(
-                `${baseUrl}/permissions`,
+            await api.post(
+                `/permissions`,
                 {
                     permission_name: permissionName,
                     permission_key: permissionKey,
                     module_name: moduleName,
                     route_path: routePath,
                     status: 1
-                },
-                { headers }
+                }
             );
 
             setPermissionName('');

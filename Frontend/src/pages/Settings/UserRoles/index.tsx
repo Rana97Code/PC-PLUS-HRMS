@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import api from '../../../api/axios';
 import Swal from 'sweetalert2';
 
 interface Role {
@@ -19,12 +19,6 @@ interface User {
 }
 
 const UserRoles = () => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
-    const token = localStorage.getItem('token');
-
-    const headers = {
-        Authorization: `Bearer ${token}`,
-    };
 
     const [users, setUsers] = useState<User[]>([]);
     const [roles, setRoles] = useState<Role[]>([]);
@@ -33,7 +27,7 @@ const UserRoles = () => {
     const getUsers = async () => {
         setLoading(true);
         try {
-            const res = await axios.get(`${baseUrl}/users-with-roles`, { headers });
+            const res = await api.get(`/users-with-roles`);
             setUsers(res.data);
         } catch (error: any) {
             Swal.fire('Error', error.response?.data?.detail || 'Failed to load users', 'error');
@@ -44,7 +38,7 @@ const UserRoles = () => {
 
     const getRoles = async () => {
         try {
-            const res = await axios.get(`${baseUrl}/roles`, { headers });
+            const res = await api.get(`/roles`);
             setRoles(res.data);
         } catch (error: any) {
             Swal.fire('Error', error.response?.data?.detail || 'Failed to load roles', 'error');
@@ -63,7 +57,7 @@ const UserRoles = () => {
         if (!confirm.isConfirmed) return;
 
         try {
-            await axios.delete(`${baseUrl}/users/${userId}`, { headers });
+            await api.delete(`/users/${userId}`);
 
             Swal.fire('Deleted', 'User deleted successfully', 'success');
             getUsers();
@@ -80,10 +74,9 @@ const UserRoles = () => {
 
     const changeUserRole = async (userId: number, roleId: number) => {
         try {
-            await axios.put(
-                `${baseUrl}/users/${userId}/change-role`,
-                { user_role: roleId },
-                { headers }
+            await api.put(
+                `/users/${userId}/change-role`,
+                { user_role: roleId }
             );
 
             Swal.fire('Success', 'User role updated successfully', 'success');

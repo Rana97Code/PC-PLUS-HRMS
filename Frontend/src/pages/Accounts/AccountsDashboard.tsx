@@ -20,7 +20,7 @@ import IconBolt from '../../components/Icon/IconBolt';
 import IconCaretDown from '../../components/Icon/IconCaretDown';
 import IconPlus from '../../components/Icon/IconPlus';
 import IconMultipleForwardRight from '../../components/Icon/IconMultipleForwardRight';
-import axios from 'axios';
+import api from '../../api/axios';
 
 
 const AccountsDashboard = () => {
@@ -29,10 +29,7 @@ const AccountsDashboard = () => {
     const dispatch = useDispatch();
 
     const auth = useSelector((state: IRootState) => state.auth);
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
-    const headers = useMemo(() => {
-        return auth.token ? { Authorization: `Bearer ${auth.token}` } : {};
-    }, [auth.token]);
+
     const isDark = useSelector((state: IRootState) => state.themeConfig.theme === 'dark' || state.themeConfig.isDarkMode);
     const isRtl = useSelector((state: IRootState) => state.themeConfig.rtlClass) === 'rtl';
 
@@ -61,7 +58,7 @@ const AccountsDashboard = () => {
 useEffect(() => {
     if (!auth.token) return;
 
-    axios.get(`${baseUrl}/accounts/monthly-chart`, { headers })
+    api.get(`/accounts/monthly-chart`)
         .then((response) => {
             setChartData({
                 office_investment: response.data?.office_investment || defaultMonthlyData,
@@ -72,7 +69,7 @@ useEffect(() => {
         })
         .catch((error) => console.error('Monthly chart error:', error));
 
-    axios.get(`${baseUrl}/accounts/cost-pie-chart`, { headers })
+    api.get(`/accounts/cost-pie-chart`)
         .then((response) => {
             setCostPieData({
                 series: response.data?.series || [0, 0, 0, 0],
@@ -81,7 +78,7 @@ useEffect(() => {
         })
         .catch((error) => console.error('Cost pie chart error:', error));
 
-}, [baseUrl, auth.token]);
+}, [auth.token]);
 
     const costSeries = costPieData?.series || [0, 0, 0, 0];
     const costLabels = costPieData?.labels || ['Today', 'This Week', 'This Month', 'Last Month'];

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
+import api from '../../api/axios';
 import Swal from 'sweetalert2';
 
 import { IRootState } from '../../store';
@@ -17,7 +17,6 @@ const LoginCover = () => {
 
     const { user } = useSelector((state: IRootState) => state.auth);
 
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:3000/pcplus/api';
 
     const [username, setUser] = useState('');
     const [password, setPassword] = useState('');
@@ -36,7 +35,7 @@ const LoginCover = () => {
             formData.append('username', username);
             formData.append('password', password);
 
-            const response = await axios.post(`${baseUrl}/auth`, formData);
+            const response = await api.post(`/auth`, formData);
 
             if (response?.data?.access_token && response?.data?.user) {
                 dispatch(

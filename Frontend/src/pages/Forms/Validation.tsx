@@ -108,7 +108,7 @@ const Validation = () => {
                                 onSubmit={() => {}}
                             >
                                 {({ errors, submitCount, touched }) => (
-                                    <Form className="space-y-5">
+                                    <Form className="space-y-5" placeholder="">
                                         <div className={submitCount ? (errors.fullName ? 'has-error' : 'has-success') : ''}>
                                             <label htmlFor="fullName">Full Name </label>
                                             <Field name="fullName" type="text" id="fullName" placeholder="Enter Full Name" className="form-input" />
@@ -206,7 +206,7 @@ const SubmittedForm = Yup.object().shape({
                                 onSubmit={() => {}}
                             >
                                 {({ errors, submitCount, touched }) => (
-                                    <Form className="space-y-5">
+                                    <Form className="space-y-5" placeholder="">
                                         <div className={submitCount ? (errors.email ? 'has-error' : 'has-success') : ''}>
                                             <label htmlFor="Email">Email</label>
                                             <Field name="email" type="text" id="Email" placeholder="Enter Email" className="form-input" />
@@ -304,7 +304,7 @@ const SubmittedForm = Yup.object().shape({
                                 onSubmit={() => {}}
                             >
                                 {({ errors, submitCount, touched }) => (
-                                    <Form className="space-y-5">
+                                    <Form className="space-y-5" placeholder="">
                                         <div className={submitCount ? (errors.select ? 'has-error' : 'has-success') : ''}>
                                             <Field as="select" name="select" className="form-select">
                                                 <option value="">Open this select menu</option>
@@ -430,7 +430,7 @@ const SubmittedForm = Yup.object().shape({
                                 onSubmit={() => {}}
                             >
                                 {({ errors, submitCount, touched, values }) => (
-                                    <Form className="space-y-5">
+                                    <Form className="space-y-5" placeholder="">
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                                             <div className={submitCount ? (errors.firstname ? 'has-error' : 'has-success') : ''}>
                                                 <label htmlFor="firstname">First Name </label>
@@ -798,7 +798,7 @@ const submitForm = () => {
                                 onSubmit={() => {}}
                             >
                                 {({ errors, submitCount, touched }) => (
-                                    <Form className="space-y-5">
+                                    <Form className="space-y-5" placeholder="">
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                                             <div className={submitCount ? (errors.firstname ? 'has-error' : 'has-success') : ''}>
                                                 <label htmlFor="firstname">First Name </label>

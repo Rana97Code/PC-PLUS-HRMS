@@ -35,26 +35,38 @@ const attendanceController = require("./controllers/employee/attendanceControlle
 
 const app = express();
 
-const allowedOrigins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(",")
-    : [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-        "https://erp.pcplusbd.com"
-    ];
+const allowedOrigins = (
+    process.env.CORS_ORIGINS ||
+    "https://erp.pcplusbd.com,https://www.erp.pcplusbd.com,http://localhost:5173,http://127.0.0.1:5173"
+)
+    .split(",")
+    .map((origin) => origin.trim().replace(/\/$/, ""));
 
-app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin) return callback(null, true);
+app.use(
+    cors({
+        origin: (origin, callback) => {
+            if (!origin) {
+                return callback(null, true);
+            }
 
-        if (allowedOrigins.includes(origin)) {
-            return callback(null, true);
-        }
+            const requestOrigin = origin.trim().replace(/\/$/, "");
 
-        return callback(new Error("Not allowed by CORS"));
-    },
-    credentials: true
-}));
+            console.log("Request Origin:", requestOrigin);
+
+            if (allowedOrigins.includes(requestOrigin)) {
+                return callback(null, true);
+            }
+
+            console.log("Blocked Origin:", requestOrigin);
+            console.log("Allowed Origins:", allowedOrigins);
+
+            return callback(
+                new Error(`Not allowed by CORS: ${requestOrigin}`)
+            );
+        },
+        credentials: true,
+    })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

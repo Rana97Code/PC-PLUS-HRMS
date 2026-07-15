@@ -1,6 +1,5 @@
 const express = require("express");
 const { Op, fn, col, literal } = require("sequelize");
-
 const Transaction = require("../models/Transaction");
 const Balance = require("../models/Balance");
 const User = require("../models/auth/User");
@@ -173,22 +172,111 @@ router.post("/pcplus/api/transaction/add-multiple-transaction", getCurrentActive
     }
 });
 
+
+
 router.get("/pcplus/api/transaction/all_transaction", getCurrentActiveUser, async (req, res) => {
-    const rows = await Transaction.findAll();
+    try {
+        const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
 
-    const data = rows.map(t => ({
-        id: t.id,
-        transaction_invoice: t.transaction_invoice,
-        transaction_type: t.transaction_type,
-        transaction_title: t.transaction_title,
-        transaction_date: t.transaction_date,
-        amount_in: t.amount_in,
-        amount_out: t.amount_out,
-        transaction_by: t.transaction_by
-    }));
+        const requestedLimit = parseInt(req.query.limit, 10) || 10;
+        const allowedLimits = [10, 20, 30, 50, 100];
 
-    return res.json(data);
-});
+        const limit = allowedLimits.includes(requestedLimit)
+            ? requestedLimit
+            : 10;
+
+            const offset = (page - 1) * limit;
+
+            const search = req.query.search?.trim() || "";
+
+            const sortBy = [
+                "id",
+                "transaction_invoice",
+                "transaction_type",
+                "transaction_title",
+                "transaction_date",
+                "amount_in",
+                "amount_out",
+                "transaction_by"
+            ].includes(req.query.sortBy)
+                ? req.query.sortBy
+                : "id";
+
+            const sortDirection =
+                req.query.sortDirection?.toUpperCase() === "ASC"
+                    ? "ASC"
+                    : "DESC";
+
+            const whereCondition = search
+                ? {
+                      [Op.or]: [
+                          {
+                              transaction_invoice: {
+                                  [Op.like]: `%${search}%`
+                              }
+                          },
+                          {
+                              transaction_type: {
+                                  [Op.like]: `%${search}%`
+                              }
+                          },
+                          {
+                              transaction_title: {
+                                  [Op.like]: `%${search}%`
+                              }
+                          },
+                          {
+                              transaction_date: {
+                                  [Op.like]: `%${search}%`
+                              }
+                          },
+                          {
+                              transaction_by: {
+                                  [Op.like]: `%${search}%`
+                              }
+                          }
+                      ]
+                  }
+                : {};
+
+            const { count, rows } = await Transaction.findAndCountAll({
+                where: whereCondition,
+
+                attributes: [
+                    "id",
+                    "transaction_invoice",
+                    "transaction_type",
+                    "transaction_title",
+                    "transaction_date",
+                    "amount_in",
+                    "amount_out",
+                    "transaction_by"
+                ],
+
+                order: [[sortBy, sortDirection]],
+
+                limit,
+                offset
+            });
+
+            return res.json({
+                data: rows,
+                pagination: {
+                    current_page: page,
+                    per_page: limit,
+                    total_records: count,
+                    total_pages: Math.ceil(count / limit)
+                }
+            });
+        } catch (error) {
+            console.error("Error fetching transactions:", error);
+
+            return res.status(500).json({
+                detail: "Failed to fetch transactions"
+            });
+        }
+    }
+);
 
 router.get("/pcplus/api/transaction/transaction_invoice/:id", getCurrentActiveUser, async (req, res) => {
     const firstTransaction = await Transaction.findByPk(req.params.id);
@@ -247,124 +335,653 @@ router.get("/pcplus/api/transaction/transaction_invoice/:id", getCurrentActiveUs
     });
 });
 
-router.get("/pcplus/api/accounts/investor-contribution", getCurrentActiveUser, async (req, res) => {
+
+function parseInvestmentFilter(query) {
+    const year =
+        query.year !== undefined &&
+        query.year !== null &&
+        query.year !== ""
+            ? Number(query.year)
+            : null;
+
+    const month =
+        query.month !== undefined &&
+        query.month !== null &&
+        query.month !== ""
+            ? Number(query.month)
+            : null;
+
+    if (
+        year !== null &&
+        (!Number.isInteger(year) ||
+            year < 1900 ||
+            year > 2200)
+    ) {
+        const error = new Error("Invalid year");
+        error.statusCode = 400;
+        throw error;
+    }
+
+    if (
+        month !== null &&
+        (!Number.isInteger(month) ||
+            month < 1 ||
+            month > 12)
+    ) {
+        const error = new Error("Invalid month");
+        error.statusCode = 400;
+        throw error;
+    }
+
+    if (month !== null && year === null) {
+        const error = new Error(
+            "Please select a year before selecting a month"
+        );
+
+        error.statusCode = 400;
+        throw error;
+    }
+
+    return {
+        year,
+        month
+    };
+}
+
+/**
+ * Creates YYYY-MM-DD without timezone conversion.
+ */
+function makeDateString(year, month, day) {
+    const formattedMonth = String(month).padStart(
+        2,
+        "0"
+    );
+
+    const formattedDay = String(day).padStart(
+        2,
+        "0"
+    );
+
+    return `${year}-${formattedMonth}-${formattedDay}`;
+}
+
+/**
+ * Returns the final day of a month.
+ */
+function getLastDayOfMonth(year, month) {
+    return new Date(year, month, 0).getDate();
+}
+
+/**
+ * Common investment query.
+ */
+function buildInvestmentWhere(
+    query,
+    additionalWhere = {}
+) {
+    const { year, month } =
+        parseInvestmentFilter(query);
+
+    const whereCondition = {
+        transaction_type: "Credit",
+        transaction_title: "Office_Investment",
+
+        amount_in: {
+            [Op.gt]: 0
+        },
+
+        ...additionalWhere
+    };
+
+    /*
+     * Specific month of a specific year.
+     *
+     * Example:
+     * startDate = 2026-06-01
+     * endDate   = 2026-06-30
+     */
+    if (year !== null && month !== null) {
+        const lastDay =
+            getLastDayOfMonth(year, month);
+
+        const startDate =
+            makeDateString(year, month, 1);
+
+        const endDate =
+            makeDateString(
+                year,
+                month,
+                lastDay
+            );
+
+        whereCondition.transaction_date = {
+            [Op.between]: [
+                startDate,
+                endDate
+            ]
+        };
+    }
+
+    /*
+     * Entire selected year.
+     */
+    if (year !== null && month === null) {
+        whereCondition.transaction_date = {
+            [Op.between]: [
+                `${year}-01-01`,
+                `${year}-12-31`
+            ]
+        };
+    }
+
+    return whereCondition;
+}
+
+/**
+ * Returns years that contain Office Investment.
+ */
+async function getInvestmentYears() {
     const rows = await Transaction.findAll({
         attributes: [
-            ["transaction_by", "investor_name"],
-            [fn("SUM", col("amount_in")), "total_amount_in"],
-            [fn("COUNT", col("id")), "total_transaction"]
+            [
+                fn(
+                    "YEAR",
+                    col("transaction_date")
+                ),
+                "year"
+            ]
         ],
+
         where: {
-            amount_in: { [Op.gt]: 0 },
             transaction_type: "Credit",
-            transaction_title: "Office_Investment"
+            transaction_title: "Office_Investment",
+
+            amount_in: {
+                [Op.gt]: 0
+            }
         },
-        group: ["transaction_by"],
+
+        group: [
+            fn(
+                "YEAR",
+                col("transaction_date")
+            )
+        ],
+
+        order: [
+            [
+                fn(
+                    "YEAR",
+                    col("transaction_date")
+                ),
+                "DESC"
+            ]
+        ],
+
         raw: true
     });
 
-    return res.json(rows.map(r => ({
-        investor_name: r.investor_name,
-        total_amount_in: Number(r.total_amount_in || 0),
-        total_transaction: r.total_transaction
-    })));
-});
+    return rows
+        .map((item) => Number(item.year))
+        .filter((year) =>
+            Number.isInteger(year)
+        );
+}
 
-router.get("/pcplus/api/accounts/investor-contribution/:investor_name", getCurrentActiveUser, async (req, res) => {
-    const rows = await Transaction.findAll({
-        where: {
-            transaction_by: req.params.investor_name,
-            amount_in: { [Op.gt]: 0 }
+
+function buildCreditTransactionWhere(
+    query,
+    transactionTitle,
+    additionalWhere = {}
+) {
+    const { year, month } =
+        parseInvestmentFilter(query);
+
+    const whereCondition = {
+        transaction_type: "Credit",
+        transaction_title: transactionTitle,
+
+        amount_in: {
+            [Op.gt]: 0
         },
-        order: [["id", "DESC"]]
-    });
 
-    return res.json(rows);
-});
+        ...additionalWhere
+    };
 
-router.get("/pcplus/api/accounts/latest-balance", getCurrentActiveUser, async (req, res) => {
-    const balance = await Balance.findOne({
-        order: [["id", "DESC"]]
-    });
+    if (year !== null && month !== null) {
+        const lastDay =
+            getLastDayOfMonth(year, month);
 
-    if (!balance) {
-        return res.json({
-            previous_cost: 0,
-            current_cost: 0,
-            payable_due: 0,
-            receivable_due: 0,
-            previous_balance: 0,
-            current_balance: 0
-        });
+        const startDate =
+            makeDateString(year, month, 1);
+
+        const endDate =
+            makeDateString(
+                year,
+                month,
+                lastDay
+            );
+
+        whereCondition.transaction_date = {
+            [Op.between]: [
+                startDate,
+                endDate
+            ]
+        };
+    } else if (
+        year !== null &&
+        month === null
+    ) {
+        whereCondition.transaction_date = {
+            [Op.between]: [
+                `${year}-01-01`,
+                `${year}-12-31`
+            ]
+        };
     }
 
-    return res.json(balance);
-});
+    return whereCondition;
+}
 
-// router.get("/pcplus/api/accounts/monthly-chart", getCurrentActiveUser, async (req, res) => {
-//     const investmentRows = await Transaction.findAll({
-//         attributes: [
-//             [literal("MONTH(transaction_date)"), "month"],
-//             [fn("SUM", col("amount_in")), "amount_in"],
-//             [fn("SUM", col("return_amount")), "return_amount"]
-//         ],
-//         where: { transaction_type: "Credit", transaction_title: "Office_Investment" },
-//         group: [literal("MONTH(transaction_date)")],
-//         raw: true
-//     });
+function buildDebitCostWhere(query) {
+    const { year, month } = parseInvestmentFilter(query);
 
-//     const incomeRows = await Transaction.findAll({
-//         attributes: [
-//             [literal("MONTH(transaction_date)"), "month"],
-//             [fn("SUM", col("amount_in")), "amount_in"],
-//             [fn("SUM", col("return_amount")), "return_amount"]
-//         ],
-//         where: { transaction_type: "Credit", transaction_title: "Service_Sales" },
-//         group: [literal("MONTH(transaction_date)")],
-//         raw: true
-//     });
+    const whereCondition = {
+        transaction_type: "Debit",
 
-//     const expenseRows = await Transaction.findAll({
-//         attributes: [
-//             [literal("MONTH(transaction_date)"), "month"],
-//             [fn("SUM", col("amount_out")), "amount_out"]
-//         ],
-//         where: { transaction_type: "Debit" },
-//         group: [literal("MONTH(transaction_date)")],
-//         raw: true
-//     });
+        cost: {
+            [Op.gt]: 0
+        }
+    };
 
-//     const officeInvestment = Array(12).fill(0);
-//     const income = Array(12).fill(0);
-//     const expenses = Array(12).fill(0);
-//     const profit = Array(12).fill(0);
+    // Specific month of a selected year
+    if (year !== null && month !== null) {
+        const lastDay = getLastDayOfMonth(year, month);
 
-//     investmentRows.forEach(row => {
-//         const idx = Number(row.month) - 1;
-//         officeInvestment[idx] = Number(
-//             (Number(row.amount_in || 0) + Number(row.return_amount || 0)).toFixed(2)
-//         );
-//     });
+        const startDate = makeDateString(
+            year,
+            month,
+            1
+        );
 
-//     incomeRows.forEach(row => {
-//         const idx = Number(row.month) - 1;
-//         const totalIncome = Number(row.amount_in || 0) + Number(row.return_amount || 0);
-//         income[idx] = Number(totalIncome.toFixed(2));
-//         profit[idx] = Number(totalIncome.toFixed(2));
-//     });
+        const endDate = makeDateString(
+            year,
+            month,
+            lastDay
+        );
 
-//     expenseRows.forEach(row => {
-//         const idx = Number(row.month) - 1;
-//         expenses[idx] = Number(Number(row.amount_out || 0).toFixed(2));
-//     });
+        whereCondition.transaction_date = {
+            [Op.between]: [
+                startDate,
+                endDate
+            ]
+        };
+    }
 
-//     return res.json({
-//         office_investment: officeInvestment,
-//         income,
-//         expenses,
-//         profit
-//     });
-// });
+    // Entire selected year
+    else if (year !== null) {
+        whereCondition.transaction_date = {
+            [Op.between]: [
+                `${year}-01-01`,
+                `${year}-12-31`
+            ]
+        };
+    }
+
+    return whereCondition;
+}
+
+router.get("/pcplus/api/accounts/latest-balance",getCurrentActiveUser,
+    async (req, res) => {
+        try {
+            const { year, month } =
+                parseInvestmentFilter(req.query);
+
+            const [
+                balance,
+                investmentResult,
+                incomeResult,
+                costResult,
+                availableYears
+            ] = await Promise.all([
+                // Latest overall balance data
+                Balance.findOne({
+                    order: [["id", "DESC"]],
+                    raw: true
+                }),
+
+                // Total Investment
+                Transaction.findOne({
+                    attributes: [
+                        [
+                            fn(
+                                "COALESCE",
+                                fn(
+                                    "SUM",
+                                    col("amount_in")
+                                ),
+                                0
+                            ),
+                            "total_investment"
+                        ]
+                    ],
+
+                    where:
+                        buildCreditTransactionWhere(
+                            req.query,
+                            "Office_Investment"
+                        ),
+
+                    raw: true
+                }),
+
+                // Total Income
+                Transaction.findOne({
+                    attributes: [
+                        [
+                            fn(
+                                "COALESCE",
+                                fn(
+                                    "SUM",
+                                    col("amount_in")
+                                ),
+                                0
+                            ),
+                            "total_income"
+                        ]
+                    ],
+
+                    where:
+                        buildCreditTransactionWhere(
+                            req.query,
+                            "Service_Sales"
+                        ),
+
+                    raw: true
+                }),
+
+                // Total Cost
+                Transaction.findOne({
+                    attributes: [
+                        [
+                            fn(
+                                "COALESCE",
+                                fn(
+                                    "SUM",
+                                    col("cost")
+                                ),
+                                0
+                            ),
+                            "total_cost"
+                        ]
+                    ],
+
+                    where:
+                        buildDebitCostWhere(
+                            req.query
+                        ),
+
+                    raw: true
+                }),
+
+                getInvestmentYears()
+            ]);
+
+            const balanceData = balance || {
+                previous_cost: 0,
+                current_cost: 0,
+                payable_due: 0,
+                receivable_due: 0,
+                previous_balance: 0,
+                current_balance: 0
+            };
+
+            return res.json({
+                ...balanceData,
+
+                total_investment: Number(
+                    investmentResult
+                        ?.total_investment || 0
+                ),
+
+                total_income: Number(
+                    incomeResult
+                        ?.total_income || 0
+                ),
+
+                total_cost: Number(
+                    costResult?.total_cost || 0
+                ),
+
+                selected_filter: {
+                    year,
+                    month
+                },
+
+                available_years:
+                    availableYears
+            });
+        } catch (error) {
+            console.error(
+                "Latest balance error:",
+                error
+            );
+
+            return res
+                .status(error.statusCode || 500)
+                .json({
+                    detail:
+                        error.message ||
+                        "Failed to fetch accounts summary"
+                });
+        }
+    }
+);
+
+
+router.get("/pcplus/api/accounts/investor-contribution", getCurrentActiveUser, async (req, res) => {
+    try {
+        const { year, month } =
+            parseInvestmentFilter(req.query);
+
+            const rows =
+                await Transaction.findAll({
+                    attributes: [
+                        [
+                            "transaction_by",
+                            "investor_name"
+                        ],
+
+                        [
+                            fn(
+                                "SUM",
+                                col("amount_in")
+                            ),
+                            "total_amount_in"
+                        ],
+
+                        [
+                            fn(
+                                "COUNT",
+                                col("id")
+                            ),
+                            "total_transaction"
+                        ]
+                    ],
+
+                    where: buildInvestmentWhere(
+                        req.query
+                    ),
+
+                    group: [
+                        "transaction_by"
+                    ],
+
+                    order: [
+                        [
+                            fn(
+                                "SUM",
+                                col("amount_in")
+                            ),
+                            "DESC"
+                        ]
+                    ],
+
+                    raw: true
+                });
+
+            const data = rows.map((item) => ({
+                investor_name:
+                    item.investor_name ||
+                    "Unknown Investor",
+
+                total_amount_in: Number(
+                    item.total_amount_in || 0
+                ),
+
+                total_transaction: Number(
+                    item.total_transaction || 0
+                )
+            }));
+
+            return res.json({
+                data,
+
+                summary: {
+                    total_investment:
+                        data.reduce(
+                            (total, item) =>
+                                total +
+                                Number(
+                                    item.total_amount_in ||
+                                        0
+                                ),
+                            0
+                        ),
+
+                    total_investors:
+                        data.length,
+
+                    total_transactions:
+                        data.reduce(
+                            (total, item) =>
+                                total +
+                                Number(
+                                    item.total_transaction ||
+                                        0
+                                ),
+                            0
+                        )
+                },
+
+                selected_filter: {
+                    year,
+                    month
+                }
+            });
+        } catch (error) {
+            console.error(
+                "Investor contribution error:",
+                error
+            );
+
+            return res
+                .status(error.statusCode || 500)
+                .json({
+                    detail:
+                        error.message ||
+                        "Failed to fetch investor contributions"
+                });
+        }
+    }
+);
+
+
+router.get(
+    "/pcplus/api/accounts/investor-contribution/:investor_name",
+    getCurrentActiveUser,
+    async (req, res) => {
+        try {
+            const { year, month } =
+                parseInvestmentFilter(req.query);
+
+            const investorName =
+                req.params.investor_name.trim();
+
+            if (!investorName) {
+                return res.status(400).json({
+                    detail:
+                        "Investor name is required"
+                });
+            }
+
+            const rows =
+                await Transaction.findAll({
+                    where: buildInvestmentWhere(
+                        req.query,
+                        {
+                            transaction_by:
+                                investorName
+                        }
+                    ),
+
+                    order: [
+                        [
+                            "transaction_date",
+                            "DESC"
+                        ],
+                        ["id", "DESC"]
+                    ],
+
+                    raw: true
+                });
+
+            const totalInvestment =
+                rows.reduce(
+                    (total, item) =>
+                        total +
+                        Number(
+                            item.amount_in || 0
+                        ),
+                    0
+                );
+
+            return res.json({
+                data: rows,
+
+                summary: {
+                    investor_name:
+                        investorName,
+
+                    total_investment:
+                        totalInvestment,
+
+                    total_transaction:
+                        rows.length
+                },
+
+                selected_filter: {
+                    year,
+                    month
+                }
+            });
+        } catch (error) {
+            console.error(
+                "Investor details error:",
+                error
+            );
+
+            return res
+                .status(error.statusCode || 500)
+                .json({
+                    detail:
+                        error.message ||
+                        "Failed to fetch investor details"
+                });
+        }
+    }
+);
+
 
 router.get("/pcplus/api/accounts/monthly-chart", getCurrentActiveUser, async (req, res) => {
     try {

@@ -137,6 +137,13 @@ const permissions = [
         status: 1,
     },
     {
+        permission_name: "Manual Attendance Add",
+        permission_key: "attendance_manual_add",
+        module_name: "Employee",
+        route_path: "/pages/employee/attendance/manual",
+        status: 1,
+    },
+    {
         permission_name: "Department View",
         permission_key: "department_view",
         module_name: "Department",

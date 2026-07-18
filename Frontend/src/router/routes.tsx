@@ -19,6 +19,7 @@ const RolePermissions = lazy(() => import('../pages/Settings/RolePermissions'));
 const Employee = lazy(() => import('../pages/HRMS/Employee/index'));
 const EmployeeAdd = lazy(() => import('../pages/HRMS/Employee/component/addEmployee'));
 const AttendanceList = lazy(() => import('../pages/HRMS/Employee/Attendance'));
+const ManualAttendance = lazy(() => import('../pages/HRMS/Employee/Attendance/ManualAttendance'));
 const EmployeeView = lazy(() => import('../pages/HRMS/Employee/EmployeeView'));
 
 const Department = lazy(() => import('../pages/HRMS/Employee/Department/index'));
@@ -89,6 +90,12 @@ const routes = [
         element: <AttendanceList />,
         module: 'hr',
         permission: 'employee_attendance_view',
+    },
+    {
+        path: '/pages/employee/attendance/manual',
+        element: <ManualAttendance />,
+        module: 'hr',
+        permission: 'attendance_manual_add',
     },
     {
         path: '/pages/employees',

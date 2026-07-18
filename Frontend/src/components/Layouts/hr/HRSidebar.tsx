@@ -108,6 +108,11 @@ const HRSidebar = () => {
                                                     <NavLink to="/pages/employee/attendance">{t('Employee Attendance')}</NavLink>
                                                 </li>
                                             )}
+                                            {can('attendance_manual_add') && (
+                                                <li>
+                                                    <NavLink to="/pages/employee/attendance/manual">{t('Manual Attendance')}</NavLink>
+                                                </li>
+                                            )}
 
                                             {can('designation_view') && (
                                                 <li>

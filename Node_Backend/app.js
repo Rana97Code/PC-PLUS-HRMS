@@ -32,6 +32,7 @@ const dashboardController = require("./controllers/employee/dashboardController"
 const departmentController = require("./controllers/employee/departmentController");
 const designationController = require("./controllers/employee/designationController");
 const attendanceController = require("./controllers/employee/attendanceController");
+const manualAttendanceController = require("./controllers/employee/manualAttendanceController");
 
 const app = express();
 
@@ -91,6 +92,7 @@ app.use(employeeController);
 app.use(dashboardController);
 app.use(departmentController);
 app.use(designationController);
+app.use(manualAttendanceController);
 
 const PORT = process.env.PORT || 3000;
 
